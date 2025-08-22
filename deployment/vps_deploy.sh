@@ -140,7 +140,31 @@ log_success "虚拟环境创建完成"
 # 8. 安装 Python 依赖
 log_info "安装 Python 依赖..."
 
-sudo -u $SERVICE_USER $PROJECT_DIR/venv/bin/pip install -r $PROJECT_DIR/requirements.txt
+# 先尝试安装基础依赖
+sudo -u $SERVICE_USER $PROJECT_DIR/venv/bin/pip install --upgrade pip setuptools wheel
+
+# 分步安装依赖，避免失败
+sudo -u $SERVICE_USER $PROJECT_DIR/venv/bin/pip install \
+    openai>=1.0.0 \
+    python-dotenv>=1.0.0 \
+    requests>=2.31.0 \
+    pandas>=2.0.0 \
+    numpy>=1.24.0
+
+sudo -u $SERVICE_USER $PROJECT_DIR/venv/bin/pip install \
+    ccxt>=4.0.0 \
+    python-binance>=1.0.17 \
+    websockets>=11.0.0 \
+    aiohttp>=3.8.0
+
+# 尝试安装完整requirements.txt，如果失败则跳过可选依赖
+if ! sudo -u $SERVICE_USER $PROJECT_DIR/venv/bin/pip install -r $PROJECT_DIR/requirements.txt; then
+    log_warning "部分可选依赖安装失败，使用基础配置"
+    sudo -u $SERVICE_USER $PROJECT_DIR/venv/bin/pip install \
+        ta>=0.10.0 \
+        python-dateutil>=2.8.0 \
+        pytz>=2023.3
+fi
 
 log_success "Python 依赖安装完成"
 

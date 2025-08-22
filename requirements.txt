@@ -7,7 +7,7 @@ numpy>=1.24.0
 
 # Data fetching
 ccxt>=4.0.0
-binance-python>=1.0.0
+python-binance>=1.0.17
 
 # Technical analysis  
 ta>=0.10.0
