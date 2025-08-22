@@ -55,11 +55,14 @@ create_dev_user() {
         
         # 设置临时密码（可选）
         echo "是否为用户 $DEV_USERNAME 设置密码？(y/n)"
-        read -r set_password
+        read -r -t 10 set_password || set_password="n"  # 10秒超时，默认跳过
         if [[ $set_password == "y" || $set_password == "Y" ]]; then
-            passwd "$DEV_USERNAME"
+            if ! passwd "$DEV_USERNAME"; then
+                log_warning "密码设置失败，将使用SSH密钥认证"
+                log_info "请确保稍后配置SSH密钥"
+            fi
         else
-            log_info "跳过密码设置，请确保配置SSH密钥认证"
+            log_info "跳过密码设置，将使用SSH密钥认证（推荐）"
         fi
         
         log_success "用户 $DEV_USERNAME 创建成功"
