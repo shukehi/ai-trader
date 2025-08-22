@@ -34,7 +34,7 @@ PROJECT_NAME="ai-trader"
 PROJECT_DIR="/opt/ai-trader"
 SERVICE_USER="aitrader"
 PYTHON_VERSION="3.9"
-GITHUB_REPO="https://github.com/YOUR_USERNAME/ai-trader.git"
+GITHUB_REPO="https://github.com/shukehi/ai-trader.git"
 
 echo "🚀 AI Trader VPS 部署开始..."
 echo "时间: $(date)"

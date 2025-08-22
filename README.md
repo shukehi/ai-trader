@@ -2,9 +2,9 @@
 
 > **专业级 AI 驱动的以太坊永续合约交易系统，集成 19+ 顶级 LLM 模型和专业 VPA 分析**
 
-[![System Status](https://img.shields.io/badge/Status-Production%20Ready-success.svg)](https://github.com/your-username/ai-trader)
-[![Reliability](https://img.shields.io/badge/Reliability-91.4%2F100-brightgreen.svg)](https://github.com/your-username/ai-trader)
-[![VPA Compliance](https://img.shields.io/badge/VPA%20Compliance-95%2F100-brightgreen.svg)](https://github.com/your-username/ai-trader)
+[![System Status](https://img.shields.io/badge/Status-Production%20Ready-success.svg)](https://github.com/shukehi/ai-trader)
+[![Reliability](https://img.shields.io/badge/Reliability-91.4%2F100-brightgreen.svg)](https://github.com/shukehi/ai-trader)
+[![VPA Compliance](https://img.shields.io/badge/VPA%20Compliance-95%2F100-brightgreen.svg)](https://github.com/shukehi/ai-trader)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## 🚀 核心特性
@@ -32,7 +32,7 @@
 ### 1. 环境设置
 ```bash
 # 克隆项目
-git clone https://github.com/your-username/ai-trader.git
+git clone https://github.com/shukehi/ai-trader.git
 cd ai-trader
 
 # 创建虚拟环境
@@ -212,6 +212,6 @@ MIT License - 详见 [LICENSE](LICENSE) 文件
 
 **🌟 如果这个项目对您有帮助，请给一个 Star！**
 
-[⭐ Star](https://github.com/your-username/ai-trader) • [🐛 Issues](https://github.com/your-username/ai-trader/issues) • [📖 Wiki](https://github.com/your-username/ai-trader/wiki)
+[⭐ Star](https://github.com/shukehi/ai-trader) • [🐛 Issues](https://github.com/shukehi/ai-trader/issues) • [📖 Wiki](https://github.com/shukehi/ai-trader/wiki)
 
 </div>

@@ -12,8 +12,8 @@ ssh root@YOUR_SERVER_IP
 
 ### 步骤 2: 执行自动部署
 ```bash
-# 一键部署脚本 (请替换 YOUR_USERNAME 为您的 GitHub 用户名)
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/ai-trader/main/deployment/vps_deploy.sh | sed 's/YOUR_USERNAME/your_actual_username/g' | bash
+# 一键部署脚本
+curl -fsSL https://raw.githubusercontent.com/shukehi/ai-trader/main/deployment/vps_deploy.sh | bash
 ```
 
 ### 步骤 3: 配置 API 密钥
