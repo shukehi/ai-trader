@@ -715,19 +715,60 @@ python main.py --symbol ETHUSDT --enable-validation  # Now includes VSA + multi-
 
 ## Production Deployment & Operations
 
-### Quick Production Setup
+### 🚀 VPS One-Click Deployment (Recommended)
 ```bash
-# 1. Deploy production environment
-bash deployment/production_setup.sh
+# NEW: Automated VPS deployment (5 minutes)
+# 1. Connect to your VPS
+ssh root@YOUR_VPS_IP
 
-# 2. Configure API key
-nano .env  # Add OPENROUTER_API_KEY=your_key_here
+# 2. Execute one-click deployment
+curl -fsSL https://raw.githubusercontent.com/shukehi/ai-trader/main/deployment/vps_deploy.sh | bash
 
-# 3. Start production analysis
+# 3. Configure API keys
+cd /opt/ai-trader
+sudo -u aitrader nano .env  # Add OPENROUTER_API_KEY
+
+# 4. Start services
+./manage.sh start
+
+# 5. Monitor system
+./manage.sh status
+./manage.sh logs
+```
+
+### 🛠️ VPS Management Commands
+```bash
+# Service management
+cd /opt/ai-trader
+./manage.sh start|stop|restart|status|health|update
+
+# Check system health
+./manage.sh health
+
+# View real-time logs
+./manage.sh logs
+
+# Update code from GitHub
+./manage.sh update
+```
+
+### 🖥️ Local Development Setup
+```bash
+# 1. Clone from GitHub
+git clone https://github.com/shukehi/ai-trader.git
+cd ai-trader
+
+# 2. Setup environment
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# 3. Configure API key
+cp .env.example .env
+nano .env  # Add OPENROUTER_API_KEY
+
+# 4. Start local analysis
 python main.py --symbol ETHUSDT --model gpt5-mini --enable-validation
-
-# 4. Monitor system
-python monitoring/production_monitor.py &
 ```
 
 ### Production-Grade Commands
@@ -847,16 +888,23 @@ ls logs/trading/ logs/ai/ logs/system/       # Check categorized log files exist
 python -c "from trading import TradeLogger; print('Logging OK')" # Test logging system
 ```
 
-## Current System Status ✅ **FULLY OPERATIONAL & VPA-OPTIMIZED**
+## Current System Status ✅ **PRODUCTION-DEPLOYED & GITHUB-READY**
 
 ### Recently Completed (Latest Session)
-**🔧 Critical System Fixes + Professional VPA Enhancement Implementation**:
+**🚀 GitHub Deployment + Production VPS System + Critical Bug Fixes**:
+
+**🌟 NEW: GitHub + Production Deployment System**:
+1. **✅ GitHub Repository**: Complete project deployed to https://github.com/shukehi/ai-trader
+2. **✅ Version Management**: Proper Git workflow with v1.0.0 release tag and MIT license
+3. **✅ Professional README**: Comprehensive project documentation with badges and quick start
+4. **✅ VPS Deployment System**: One-click automated deployment script for production servers
+5. **✅ Production Documentation**: Complete deployment guides and troubleshooting manuals
 
 **🚨 Major Bug Fixes** ✅ **RESOLVED**:
-1. **✅ Binance API Connection Fix**: Resolved critical ccxt configuration error (`defaultType: 'future'` → `'swap'`)
-2. **✅ Symbol Format Standardization**: Fixed ETHUSDT/ETH/USDT format inconsistencies throughout system
-3. **✅ Network Resilience**: Added 3-retry mechanism with exponential backoff for API failures
-4. **✅ Startup Validation**: Enhanced connection verification before trading system startup
+6. **✅ Binance API Connection Fix**: Resolved critical ccxt configuration error (`defaultType: 'future'` → `'swap'`)
+7. **✅ Symbol Format Standardization**: Fixed ETHUSDT/ETH/USDT format inconsistencies throughout system
+8. **✅ Network Resilience**: Added 3-retry mechanism with exponential backoff for API failures
+9. **✅ Startup Validation**: Enhanced connection verification before trading system startup
 
 **Professional VPA Enhancement Implementation** - Achieving Anna Coulling methodology compliance:
 5. **✅ VSA Analysis Engine**: Professional Anna Coulling methodology implementation
@@ -993,14 +1041,54 @@ python examples/trading_demo.py
 
 **Core Value Delivered**: A complete, production-ready AI trading system that combines professional VSA analysis, real-time data processing, intelligent signal execution, and comprehensive risk management - transforming AI analysis into actionable trading decisions.
 
+## Repository Information & Version Management
+
+### 📦 GitHub Repository
+- **Main Repository**: https://github.com/shukehi/ai-trader
+- **Current Version**: v1.0.0 (Production-Ready Release)
+- **License**: MIT License with trading disclaimers
+- **Documentation**: Complete guides in `docs/` directory
+
+### 🔄 Version Control Workflow
+```bash
+# Clone the repository
+git clone https://github.com/shukehi/ai-trader.git
+
+# Check current version
+git tag --list
+git describe --tags
+
+# Pull latest updates
+git pull origin main
+
+# Check commit history
+git log --oneline -10
+```
+
+### 📚 Key Documentation Files
+- **README.md**: Project overview and quick start guide
+- **docs/setup/VPS_DEPLOYMENT_GUIDE.md**: Complete VPS deployment tutorial
+- **deployment/QUICK_DEPLOY.md**: One-page deployment commands
+- **docs/user-guides/**: User manuals and trading guides
+- **docs/technical/cli.md**: CLI reference and advanced usage
+
 ## Quick Start for New Developers
 
-1. **Setup**: `source venv/bin/activate && pip install -r requirements.txt`
-2. **Configure**: Add `OPENROUTER_API_KEY` to `.env` file  
-3. **Validate**: `python -c "from config import Settings; Settings.validate()"`
-4. **Test System**: `python tests/test_feasibility.py`
-5. **Try Analysis**: `python main.py --symbol ETHUSDT --mode quick`
-6. **Try Trading**: `python examples/trading_demo.py`
+### 🚀 **Option 1: VPS Production Deployment (Recommended)**
+```bash
+# Single command VPS deployment
+ssh root@YOUR_VPS_IP
+curl -fsSL https://raw.githubusercontent.com/shukehi/ai-trader/main/deployment/vps_deploy.sh | bash
+```
+
+### 🖥️ **Option 2: Local Development**
+1. **Setup**: `git clone https://github.com/shukehi/ai-trader.git && cd ai-trader`
+2. **Environment**: `python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt`
+3. **Configure**: `cp .env.example .env` and add `OPENROUTER_API_KEY`
+4. **Validate**: `python -c "from config import Settings; Settings.validate()"`
+5. **Test System**: `python tests/test_feasibility.py`
+6. **Try Analysis**: `python main.py --symbol ETHUSDT --mode quick`
+7. **Try Trading**: `python examples/trading_demo.py`
 
 **System Highlights**:
 - 🎯 **Direct AI Analysis**: No traditional indicators needed
