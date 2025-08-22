@@ -1,0 +1,12 @@
+[
+  {
+    "event_id": "79294a6d",
+    "timestamp": 1755784860.7585762,
+    "event_type": "emergency_stop",
+    "symbol": null,
+    "severity": "critical",
+    "description": "紧急停止触发: 测试紧急停止",
+    "impact": 0.0,
+    "action_taken": "停止所有新开仓，准备清仓"
+  }
+]

@@ -1,0 +1,178 @@
+{
+  "trading_config": {
+    "description": "ETH永续合约AI交易助手 - 模拟交易配置",
+    "version": "1.0.0",
+    "initial_balance": 10000.0,
+    "default_symbol": "ETHUSDT",
+    "default_timeframe": "1h",
+    
+    "exchange_settings": {
+      "maker_fee": 0.0002,
+      "taker_fee": 0.0004,
+      "slippage_factor": 0.0001,
+      "default_leverage": 10.0
+    },
+    
+    "risk_management": {
+      "default_risk_level": "moderate",
+      "max_single_trade_risk": 0.02,
+      "max_total_risk": 0.06,
+      "max_positions": 5,
+      "max_daily_trades": 10,
+      "emergency_stop_drawdown": 0.15,
+      
+      "risk_levels": {
+        "conservative": {
+          "max_single_trade_risk": 0.01,
+          "max_total_risk": 0.03,
+          "max_positions": 3,
+          "max_leverage": 5.0,
+          "drawdown_limit": 0.05
+        },
+        "moderate": {
+          "max_single_trade_risk": 0.02,
+          "max_total_risk": 0.06,
+          "max_positions": 5,
+          "max_leverage": 10.0,
+          "drawdown_limit": 0.10
+        },
+        "aggressive": {
+          "max_single_trade_risk": 0.03,
+          "max_total_risk": 0.10,
+          "max_positions": 8,
+          "max_leverage": 20.0,
+          "drawdown_limit": 0.15
+        }
+      }
+    },
+    
+    "signal_execution": {
+      "default_execution_mode": "confirm",
+      "min_signal_strength": 2,
+      "min_confidence_score": 0.6,
+      "min_risk_reward_ratio": 1.5,
+      "price_deviation_threshold": 0.02,
+      
+      "auto_execution_conditions": {
+        "min_consensus_score": 0.8,
+        "required_vsa_signals": ["no_demand", "no_supply", "spring", "climax_volume"],
+        "min_strength": 3
+      }
+    },
+    
+    "ai_analysis": {
+      "default_model": "gpt4o-mini",
+      "enable_validation": true,
+      "fast_validation": false,
+      "validation_models": {
+        "primary": ["gpt5-mini", "claude-opus-41"],
+        "validation": ["gpt4o-mini", "gemini-flash", "claude-haiku"],
+        "arbitration": "claude-haiku"
+      },
+      "analysis_timeout": 60,
+      "retry_attempts": 3
+    },
+    
+    "monitoring": {
+      "refresh_interval": 1.0,
+      "max_history_length": 3600,
+      "enable_real_time": true,
+      "alert_thresholds": {
+        "balance_drop_percent": 0.05,
+        "unrealized_loss_percent": 0.10,
+        "position_count_max": 8,
+        "risk_utilization_high": 0.85
+      }
+    },
+    
+    "logging": {
+      "log_directory": "logs",
+      "enable_trade_logging": true,
+      "enable_ai_decision_logging": true,
+      "enable_risk_event_logging": true,
+      "log_retention_days": 90,
+      "export_formats": ["json", "csv", "sqlite"],
+      "auto_backup": true
+    },
+    
+    "position_sizing": {
+      "method": "anna_coulling",
+      "base_risk_percent": 0.02,
+      "max_position_percent": 0.05,
+      "correlation_limit": 0.70,
+      "strength_multipliers": {
+        "weak": 0.5,
+        "moderate": 0.75,
+        "strong": 1.0,
+        "very_strong": 1.2
+      },
+      "consecutive_loss_adjustment": {
+        "after_2_losses": 0.75,
+        "after_3_losses": 0.5,
+        "after_5_losses": 0.25
+      }
+    },
+    
+    "order_management": {
+      "default_order_type": "market",
+      "enable_conditional_orders": true,
+      "enable_trailing_stops": true,
+      "max_order_age_minutes": 60,
+      "order_retry_attempts": 3,
+      "partial_fill_handling": "continue",
+      
+      "bracket_orders": {
+        "enable_auto_sl_tp": true,
+        "default_sl_percent": 0.02,
+        "default_tp_percent": 0.04,
+        "trailing_stop_distance": 0.01
+      }
+    },
+    
+    "vsa_analysis": {
+      "enable_vsa_signals": true,
+      "required_signals": ["wide_spread", "volume_analysis", "close_position"],
+      "signal_weights": {
+        "no_demand": 0.3,
+        "no_supply": 0.3,
+        "climax_volume": 0.4,
+        "upthrust": 0.25,
+        "spring": 0.25,
+        "wide_spread": 0.2,
+        "narrow_spread": 0.15
+      },
+      "market_phases": {
+        "accumulation": {"weight": 0.25, "risk_multiplier": 1.2},
+        "markup": {"weight": 0.30, "risk_multiplier": 1.0},
+        "distribution": {"weight": 0.25, "risk_multiplier": 0.8},
+        "markdown": {"weight": 0.20, "risk_multiplier": 0.6}
+      }
+    },
+    
+    "performance_tracking": {
+      "enable_performance_tracking": true,
+      "benchmark_symbol": "ETHUSDT",
+      "track_metrics": [
+        "total_return", "sharpe_ratio", "max_drawdown", 
+        "win_rate", "profit_factor", "avg_trade_duration"
+      ],
+      "generate_daily_reports": true,
+      "generate_weekly_reports": true,
+      "performance_alerts": {
+        "drawdown_warning": 0.10,
+        "drawdown_critical": 0.15,
+        "consecutive_losses": 5,
+        "low_win_rate": 0.40
+      }
+    },
+    
+    "development": {
+      "debug_mode": false,
+      "verbose_logging": false,
+      "mock_mode": false,
+      "test_mode": false,
+      "api_rate_limit": true,
+      "simulation_speed": 1.0
+    }
+  }
+}

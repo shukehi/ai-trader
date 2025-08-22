@@ -1,0 +1,122 @@
+# Environment and Configuration Files
+.env
+.env.local
+.env.production
+.env.staging
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+venv*/
+ENV/
+env/
+.venv/
+.ENV/
+.env/
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs and Databases
+logs/*.log
+logs/*.db
+logs/trading/*.db
+logs/ai/*.log
+logs/system/*.log
+*.log
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary and Cache Files
+*.tmp
+*.temp
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# API Keys and Secrets (Double Protection)
+*api_key*
+*secret*
+*token*
+credentials.json
+config/secrets.json
+
+# Trading Data and Results (Sensitive)
+results/production/
+results/live_trading/
+backups/
+trading_history.csv
+account_statements/
+
+# Large Data Files
+data/samples/*.csv
+data/cache/*
+*.csv
+!data/samples/README.md
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints
+
+# PyCharm
+.idea/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
