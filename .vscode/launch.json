@@ -1,0 +1,271 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "AI Trader - Quick Analysis",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "args": [
+                "--symbol", "ETHUSDT",
+                "--model", "gpt5-mini",
+                "--mode", "quick"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "/opt/ai-trader",
+            "env": {
+                "PYTHONPATH": "/opt/ai-trader"
+            },
+            "stopOnEntry": false,
+            "justMyCode": false
+        },
+        {
+            "name": "AI Trader - Full VPA Analysis",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "args": [
+                "--symbol", "ETHUSDT",
+                "--model", "gpt5-mini",
+                "--enable-validation"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "/opt/ai-trader",
+            "env": {
+                "PYTHONPATH": "/opt/ai-trader"
+            }
+        },
+        {
+            "name": "AI Trader - Trading Mode (Signal Only)",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "args": [
+                "--enable-trading",
+                "--signal-only",
+                "--symbol", "ETHUSDT",
+                "--model", "gemini-flash"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "/opt/ai-trader",
+            "env": {
+                "PYTHONPATH": "/opt/ai-trader",
+                "DEBUG": "1"
+            }
+        },
+        {
+            "name": "AI Trader - Auto Trading (DEMO)",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "args": [
+                "--enable-trading",
+                "--auto-trade",
+                "--initial-balance", "1000",
+                "--max-risk", "0.01"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "/opt/ai-trader",
+            "env": {
+                "PYTHONPATH": "/opt/ai-trader",
+                "DEBUG": "1"
+            }
+        },
+        {
+            "name": "AI Trader - Ultra Economy Mode",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "args": [
+                "--ultra-economy",
+                "--symbol", "ETHUSDT",
+                "--limit", "30"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "/opt/ai-trader"
+        },
+        {
+            "name": "Trading Demo Script",
+            "type": "python",
+            "request": "launch",
+            "program": "examples/trading_demo.py",
+            "console": "integratedTerminal",
+            "cwd": "/opt/ai-trader",
+            "env": {
+                "PYTHONPATH": "/opt/ai-trader"
+            }
+        },
+        {
+            "name": "WebSocket VPA Monitor",
+            "type": "python",
+            "request": "launch",
+            "program": "examples/websocket_demo.py",
+            "args": ["15"],
+            "console": "integratedTerminal",
+            "cwd": "/opt/ai-trader",
+            "env": {
+                "PYTHONPATH": "/opt/ai-trader"
+            }
+        },
+        {
+            "name": "REST VPA Test",
+            "type": "python",
+            "request": "launch",
+            "program": "test_rest_vpa.py",
+            "console": "integratedTerminal",
+            "cwd": "/opt/ai-trader",
+            "env": {
+                "PYTHONPATH": "/opt/ai-trader"
+            }
+        },
+        {
+            "name": "Test Suite - Feasibility",
+            "type": "python",
+            "request": "launch",
+            "program": "-m",
+            "args": ["pytest", "tests/test_feasibility.py", "-v"],
+            "console": "integratedTerminal",
+            "cwd": "/opt/ai-trader",
+            "env": {
+                "PYTHONPATH": "/opt/ai-trader"
+            }
+        },
+        {
+            "name": "Test Suite - Multi-Model Validation",
+            "type": "python",
+            "request": "launch",
+            "program": "-m",
+            "args": ["pytest", "tests/test_multi_model_validation.py", "-v"],
+            "console": "integratedTerminal",
+            "cwd": "/opt/ai-trader",
+            "env": {
+                "PYTHONPATH": "/opt/ai-trader",
+                "RUN_INTEGRATION_TESTS": "false"
+            }
+        },
+        {
+            "name": "Test Suite - Simulated Trading",
+            "type": "python",
+            "request": "launch",
+            "program": "-m",
+            "args": ["pytest", "tests/test_simulated_trading.py", "-v"],
+            "console": "integratedTerminal",
+            "cwd": "/opt/ai-trader",
+            "env": {
+                "PYTHONPATH": "/opt/ai-trader"
+            }
+        },
+        {
+            "name": "Test Suite - VPA Enhancement",
+            "type": "python",
+            "request": "launch",
+            "program": "-m",
+            "args": ["pytest", "tests/test_vpa_enhancement.py", "-v"],
+            "console": "integratedTerminal",
+            "cwd": "/opt/ai-trader",
+            "env": {
+                "PYTHONPATH": "/opt/ai-trader"
+            }
+        },
+        {
+            "name": "Debug - Data Fetcher",
+            "type": "python",
+            "request": "launch",
+            "program": "-c",
+            "args": ["from data.binance_fetcher import BinanceFetcher; fetcher = BinanceFetcher(); data = fetcher.get_klines('ETHUSDT', '1h', 50); print(f'Fetched {len(data)} records'); print(data.tail())"],
+            "console": "integratedTerminal",
+            "cwd": "/opt/ai-trader",
+            "env": {
+                "PYTHONPATH": "/opt/ai-trader"
+            }
+        },
+        {
+            "name": "Debug - VSA Calculator",
+            "type": "python",
+            "request": "launch",
+            "program": "-c",
+            "args": ["from data.vsa_calculator import VSACalculator; from data.binance_fetcher import BinanceFetcher; fetcher = BinanceFetcher(); data = fetcher.get_klines('ETHUSDT', '1h', 50); vsa = VSACalculator(); signals = vsa.calculate_vsa_signals(data); print('VSA Signals:'); print(signals.tail())"],
+            "console": "integratedTerminal",
+            "cwd": "/opt/ai-trader",
+            "env": {
+                "PYTHONPATH": "/opt/ai-trader"
+            }
+        },
+        {
+            "name": "Debug - OpenRouter Client",
+            "type": "python",
+            "request": "launch",
+            "program": "-c",
+            "args": ["from ai.openrouter_client import OpenRouterClient; client = OpenRouterClient(); response = client.analyze('Test message', model='gemini-flash'); print('Response:', response)"],
+            "console": "integratedTerminal",
+            "cwd": "/opt/ai-trader",
+            "env": {
+                "PYTHONPATH": "/opt/ai-trader"
+            }
+        },
+        {
+            "name": "Monitor - Production Status",
+            "type": "python",
+            "request": "launch",
+            "program": "monitoring/production_monitor.py",
+            "args": ["--once"],
+            "console": "integratedTerminal",
+            "cwd": "/opt/ai-trader",
+            "env": {
+                "PYTHONPATH": "/opt/ai-trader"
+            }
+        },
+        {
+            "name": "Utils - Cost Controller",
+            "type": "python",
+            "request": "launch",
+            "program": "utils/cost_controller.py",
+            "console": "integratedTerminal",
+            "cwd": "/opt/ai-trader",
+            "env": {
+                "PYTHONPATH": "/opt/ai-trader"
+            }
+        },
+        {
+            "name": "Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "/opt/ai-trader",
+            "env": {
+                "PYTHONPATH": "/opt/ai-trader"
+            }
+        },
+        {
+            "name": "Current File with Args",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "/opt/ai-trader",
+            "args": [],
+            "env": {
+                "PYTHONPATH": "/opt/ai-trader"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Full System Test",
+            "configurations": [
+                "Test Suite - Feasibility",
+                "Test Suite - Multi-Model Validation",
+                "Test Suite - VPA Enhancement"
+            ]
+        },
+        {
+            "name": "Development Debugging",
+            "configurations": [
+                "Debug - Data Fetcher",
+                "Debug - VSA Calculator",
+                "AI Trader - Quick Analysis"
+            ]
+        }
+    ]
+}

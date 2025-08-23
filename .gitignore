@@ -39,7 +39,7 @@ env/
 .env/
 
 # IDE and Editor Files
-.vscode/
+# .vscode/ - 保留VS Code远程开发配置
 .idea/
 *.swp
 *.swo

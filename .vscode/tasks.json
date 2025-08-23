@@ -1,0 +1,335 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Activate Virtual Environment",
+            "type": "shell",
+            "command": "source venv/bin/activate",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Validate System Configuration",
+            "type": "shell",
+            "command": "source venv/bin/activate && python -c \"from config import Settings; Settings.validate(); print('✅ System configuration valid')\"",
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Run Feasibility Tests",
+            "type": "shell",
+            "command": "source venv/bin/activate && python tests/test_feasibility.py",
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Run Multi-Model Validation Tests (No API)",
+            "type": "shell",
+            "command": "source venv/bin/activate && RUN_INTEGRATION_TESTS=false python tests/test_multi_model_validation.py",
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Run VPA Enhancement Tests",
+            "type": "shell",
+            "command": "source venv/bin/activate && python tests/test_vpa_enhancement.py",
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Run Simulated Trading Tests",
+            "type": "shell",
+            "command": "source venv/bin/activate && python tests/test_simulated_trading.py",
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Quick VPA Analysis",
+            "type": "shell",
+            "command": "source venv/bin/activate && python main.py --symbol ETHUSDT --mode quick --model gemini-flash",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Full VPA Analysis with Validation",
+            "type": "shell",
+            "command": "source venv/bin/activate && python main.py --symbol ETHUSDT --model gpt5-mini --enable-validation",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Start Trading Demo",
+            "type": "shell",
+            "command": "source venv/bin/activate && python examples/trading_demo.py",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Start WebSocket VPA Monitor (15min)",
+            "type": "shell",
+            "command": "source venv/bin/activate && python examples/websocket_demo.py 15",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Check System Status",
+            "type": "shell",
+            "command": "./manage.sh status",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "View System Logs",
+            "type": "shell",
+            "command": "./manage.sh logs",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Monitor Trading Logs (Real-time)",
+            "type": "shell",
+            "command": "tail -f logs/trading/trades_$(date +%Y%m%d).csv",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Monitor AI Analysis Logs (Real-time)",
+            "type": "shell",
+            "command": "tail -f logs/ai/analysis_$(date +%Y%m%d).log",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Check Cost Usage",
+            "type": "shell",
+            "command": "source venv/bin/activate && python utils/cost_controller.py",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Production Health Check",
+            "type": "shell",
+            "command": "source venv/bin/activate && python monitoring/production_monitor.py --once",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Install/Update Dependencies",
+            "type": "shell",
+            "command": "source venv/bin/activate && pip install -r requirements.txt",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Code Quality Check",
+            "type": "shell",
+            "command": "source venv/bin/activate && python -m flake8 . --exclude=venv --max-line-length=120",
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Type Check",
+            "type": "shell",
+            "command": "source venv/bin/activate && python -m mypy . --ignore-missing-imports",
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Git Status",
+            "type": "shell",
+            "command": "git status",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Git Pull Latest",
+            "type": "shell",
+            "command": "git pull origin main",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        },
+        {
+            "label": "Backup System",
+            "type": "shell",
+            "command": "bash scripts/backup_system.sh",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "/opt/ai-trader"
+            }
+        }
+    ]
+}

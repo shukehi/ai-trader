@@ -1,0 +1,71 @@
+# VS Code Remote SSH 配置模板
+# 复制此内容到 ~/.ssh/config 文件中
+
+# AI Trader VPS 远程开发环境配置
+Host ai-trader-vps
+    # VPS的IP地址或域名（请替换为实际值）
+    HostName YOUR_VPS_IP_ADDRESS
+    
+    # 远程开发用户（由setup_remote_dev_user.sh脚本创建）
+    User ai-trader-dev
+    
+    # SSH私钥文件路径（请确保已生成对应的密钥对）
+    IdentityFile ~/.ssh/ai-trader-dev
+    
+    # SSH端口（默认22，如果VPS使用其他端口请修改）
+    Port 22
+    
+    # 保持连接活跃，避免超时断开
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    
+    # 连接超时设置（秒）
+    ConnectTimeout 30
+    
+    # 压缩数据传输（可选，在慢网络环境下有用）
+    # Compression yes
+    
+    # 转发代理（如果需要）
+    # ForwardAgent yes
+    
+    # 本地端口转发（如果需要访问VPS上的Web服务）
+    # LocalForward 8080 localhost:8080
+    # LocalForward 3000 localhost:3000
+
+# 可选：生产环境配置（如果有单独的生产服务器）
+Host ai-trader-prod
+    HostName YOUR_PROD_IP_ADDRESS
+    User ai-trader
+    IdentityFile ~/.ssh/ai-trader-prod
+    Port 22
+    ServerAliveInterval 60
+
+# 示例：多个开发环境配置
+# Host ai-trader-dev2
+#     HostName DEV2_IP_ADDRESS
+#     User ai-trader-dev
+#     IdentityFile ~/.ssh/ai-trader-dev
+#     Port 22
+
+# 配置说明：
+# 1. 将 YOUR_VPS_IP_ADDRESS 替换为实际的VPS IP地址
+# 2. 确保私钥文件 ~/.ssh/ai-trader-dev 存在且权限正确 (chmod 600)
+# 3. 如果VPS使用非标准SSH端口，修改Port值
+# 4. 根据需要启用或禁用可选配置
+
+# 常见网络配置（根据需要取消注释）:
+
+# 对于有代理的网络环境：
+# Host ai-trader-vps
+#     ProxyCommand nc -X connect -x proxy.company.com:8080 %h %p
+#     # 或使用 ssh 跳板机
+#     # ProxyJump jumphost.company.com
+
+# 对于需要特定网络接口的环境：
+# Host ai-trader-vps
+#     BindAddress 192.168.1.100
+
+# 对于需要特定加密算法的环境：
+# Host ai-trader-vps
+#     Ciphers aes128-ctr,aes192-ctr,aes256-ctr
+#     MACs hmac-sha1,hmac-sha2-256

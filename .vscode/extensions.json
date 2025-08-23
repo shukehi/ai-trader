@@ -1,0 +1,54 @@
+{
+    "recommendations": [
+        // Python开发必备
+        "ms-python.python",
+        "ms-python.flake8",
+        "ms-python.pylint",
+        "ms-python.autopep8",
+        
+        // 远程开发
+        "ms-vscode-remote.remote-ssh",
+        "ms-vscode-remote.remote-ssh-edit",
+        "ms-vscode-remote.remote-explorer",
+        
+        // Git和版本控制
+        "eamodio.gitlens",
+        "github.vscode-pull-request-github",
+        
+        // API测试和开发工具
+        "rangav.vscode-thunder-client",
+        "humao.rest-client",
+        
+        // JSON和数据文件
+        "ms-vscode.vscode-json",
+        "mechatroner.rainbow-csv",
+        
+        // Markdown和文档
+        "yzhang.markdown-all-in-one",
+        "shd101wyy.markdown-preview-enhanced",
+        
+        // 代码质量和格式化
+        "ms-python.black-formatter",
+        "charliermarsh.ruff",
+        
+        // 实用工具
+        "ms-vscode.vscode-terminal",
+        "christian-kohler.path-intellisense",
+        "streetsidesoftware.code-spell-checker",
+        
+        // Docker和容器（如果需要）
+        "ms-vscode-remote.remote-containers",
+        
+        // 数据库工具（用于查看交易日志数据库）
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-sqlite",
+        
+        // 日志文件查看
+        "emilast.logfilehighlighter"
+    ],
+    "unwantedRecommendations": [
+        // 不推荐的扩展（可能与项目冲突或不必要）
+        "ms-python.isort",
+        "ms-toolsai.jupyter"
+    ]
+}
