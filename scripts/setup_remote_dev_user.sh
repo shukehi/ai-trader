@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 # 配置变量
 DEV_USERNAME="ai-trader-dev"
 PROJECT_DIR="/opt/ai-trader"
-MAIN_USERNAME="ai-trader"
+MAIN_USERNAME="aitrader"  # 修正为实际的服务用户名
 
 # 日志函数
 log_info() {
@@ -40,6 +40,47 @@ check_root() {
         log_error "此脚本需要root权限运行"
         echo "使用命令: sudo $0"
         exit 1
+    fi
+}
+
+# 动态检测实际的服务用户组
+detect_service_user() {
+    log_info "检测服务用户和组..."
+    
+    # 检查项目目录的所有者
+    if [[ -d "$PROJECT_DIR" ]]; then
+        local dir_owner=$(stat -c '%U' "$PROJECT_DIR" 2>/dev/null || stat -f '%Su' "$PROJECT_DIR" 2>/dev/null)
+        local dir_group=$(stat -c '%G' "$PROJECT_DIR" 2>/dev/null || stat -f '%Sg' "$PROJECT_DIR" 2>/dev/null)
+        
+        if [[ -n "$dir_owner" && "$dir_owner" != "root" ]]; then
+            MAIN_USERNAME="$dir_owner"
+            log_success "检测到服务用户: $MAIN_USERNAME"
+        fi
+        
+        if [[ -n "$dir_group" && "$dir_group" != "root" ]]; then
+            MAIN_GROUPNAME="$dir_group"
+            log_success "检测到服务组: $MAIN_GROUPNAME"
+        fi
+    fi
+    
+    # 如果没有检测到组名，使用用户名作为组名
+    if [[ -z "$MAIN_GROUPNAME" ]]; then
+        MAIN_GROUPNAME="$MAIN_USERNAME"
+    fi
+    
+    # 验证用户和组是否存在
+    if id "$MAIN_USERNAME" &>/dev/null; then
+        log_success "服务用户 '$MAIN_USERNAME' 存在"
+    else
+        log_warning "服务用户 '$MAIN_USERNAME' 不存在，将使用默认配置"
+        MAIN_USERNAME="aitrader"
+        MAIN_GROUPNAME="aitrader"
+    fi
+    
+    if getent group "$MAIN_GROUPNAME" > /dev/null 2>&1; then
+        log_success "服务组 '$MAIN_GROUPNAME' 存在"
+    else
+        log_warning "服务组 '$MAIN_GROUPNAME' 不存在，将创建"
     fi
 }
 
@@ -77,18 +118,18 @@ setup_user_groups() {
     usermod -aG sudo "$DEV_USERNAME"
     log_success "用户 $DEV_USERNAME 已添加到sudo组"
     
-    # 添加到ai-trader组（如果存在）
-    if getent group "$MAIN_USERNAME" > /dev/null 2>&1; then
-        usermod -aG "$MAIN_USERNAME" "$DEV_USERNAME"
-        log_success "用户 $DEV_USERNAME 已添加到 $MAIN_USERNAME 组"
+    # 添加到服务组（动态检测的组名）
+    if getent group "$MAIN_GROUPNAME" > /dev/null 2>&1; then
+        usermod -aG "$MAIN_GROUPNAME" "$DEV_USERNAME"
+        log_success "用户 $DEV_USERNAME 已添加到 $MAIN_GROUPNAME 组"
     else
-        log_warning "组 $MAIN_USERNAME 不存在，将创建并配置"
-        groupadd "$MAIN_USERNAME"
-        usermod -aG "$MAIN_USERNAME" "$DEV_USERNAME"
+        log_warning "组 $MAIN_GROUPNAME 不存在，将创建并配置"
+        groupadd "$MAIN_GROUPNAME"
+        usermod -aG "$MAIN_GROUPNAME" "$DEV_USERNAME"
         
-        # 如果ai-trader用户存在，也添加到组中
+        # 如果服务用户存在，也添加到组中
         if id "$MAIN_USERNAME" &>/dev/null; then
-            usermod -aG "$MAIN_USERNAME" "$MAIN_USERNAME"
+            usermod -aG "$MAIN_GROUPNAME" "$MAIN_USERNAME"
         fi
     fi
 }
@@ -103,9 +144,9 @@ setup_project_permissions() {
         exit 1
     fi
     
-    # 设置目录所有者为ai-trader用户和组
-    chown -R "$MAIN_USERNAME:$MAIN_USERNAME" "$PROJECT_DIR"
-    log_success "目录所有者设置完成"
+    # 设置目录所有者为服务用户和组
+    chown -R "$MAIN_USERNAME:$MAIN_GROUPNAME" "$PROJECT_DIR"
+    log_success "目录所有者设置完成 ($MAIN_USERNAME:$MAIN_GROUPNAME)"
     
     # 设置目录权限（775：所有者和组可读写执行，其他用户只读执行）
     chmod -R 775 "$PROJECT_DIR"
@@ -239,6 +280,7 @@ main() {
     echo
     
     check_root
+    detect_service_user
     create_dev_user
     setup_user_groups
     setup_project_permissions

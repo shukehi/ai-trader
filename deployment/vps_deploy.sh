@@ -129,6 +129,18 @@ fi
 
 log_success "代码克隆/更新完成"
 
+# 6.5. 修复Git权限问题
+log_info "修复Git权限配置..."
+cd $PROJECT_DIR
+
+# 添加安全目录配置
+git config --global --add safe.directory $PROJECT_DIR 2>/dev/null || true
+sudo -u $SERVICE_USER git config --global --add safe.directory $PROJECT_DIR 2>/dev/null || true
+
+# 确保Git目录权限正确
+chown -R $SERVICE_USER:$SERVICE_USER $PROJECT_DIR/.git
+log_success "Git权限修复完成"
+
 # 7. 设置 Python 虚拟环境
 log_info "设置 Python 虚拟环境..."
 
@@ -140,31 +152,93 @@ log_success "虚拟环境创建完成"
 # 8. 安装 Python 依赖
 log_info "安装 Python 依赖..."
 
-# 先尝试安装基础依赖
+# 升级pip和基础工具
+log_info "升级pip和基础安装工具..."
 sudo -u $SERVICE_USER $PROJECT_DIR/venv/bin/pip install --upgrade pip setuptools wheel
 
-# 分步安装依赖，避免失败
-sudo -u $SERVICE_USER $PROJECT_DIR/venv/bin/pip install \
-    openai>=1.0.0 \
-    python-dotenv>=1.0.0 \
-    requests>=2.31.0 \
-    pandas>=2.0.0 \
-    numpy>=1.24.0
+# 清理可能存在的临时文件
+log_info "清理临时文件..."
+sudo -u $SERVICE_USER find $PROJECT_DIR -name "=*" -type f -delete 2>/dev/null || true
 
-sudo -u $SERVICE_USER $PROJECT_DIR/venv/bin/pip install \
-    ccxt>=4.0.0 \
-    python-binance>=1.0.17 \
-    websockets>=11.0.0 \
-    aiohttp>=3.8.0
-
-# 尝试安装完整requirements.txt，如果失败则跳过可选依赖
-if ! sudo -u $SERVICE_USER $PROJECT_DIR/venv/bin/pip install -r $PROJECT_DIR/requirements.txt; then
-    log_warning "部分可选依赖安装失败，使用基础配置"
-    sudo -u $SERVICE_USER $PROJECT_DIR/venv/bin/pip install \
-        ta>=0.10.0 \
-        python-dateutil>=2.8.0 \
-        pytz>=2023.3
+# 阶段1: 安装核心依赖（必须成功）
+log_info "安装核心依赖（第1阶段）..."
+if sudo -u $SERVICE_USER $PROJECT_DIR/venv/bin/pip install -r $PROJECT_DIR/requirements-core.txt; then
+    log_success "核心依赖安装成功"
+else
+    log_error "核心依赖安装失败，尝试逐个安装..."
+    
+    # 核心依赖逐个安装，确保关键组件可用
+    CORE_PACKAGES=(
+        "openai>=1.0.0"
+        "python-dotenv>=1.0.0"
+        "requests>=2.31.0"
+        "pandas>=2.0.0"
+        "numpy>=1.24.0"
+        "ccxt>=4.0.0"
+        "python-binance>=1.0.17"
+        "websockets>=11.0.0"
+        "aiohttp>=3.8.0"
+        "python-dateutil>=2.8.0"
+        "pytz>=2023.3"
+    )
+    
+    for package in "${CORE_PACKAGES[@]}"; do
+        if sudo -u $SERVICE_USER $PROJECT_DIR/venv/bin/pip install "$package"; then
+            log_success "✓ $package"
+        else
+            log_warning "✗ $package - 将影响系统功能"
+        fi
+    done
 fi
+
+# 阶段2: 安装可选依赖（允许失败）
+log_info "安装可选依赖（第2阶段）..."
+if sudo -u $SERVICE_USER $PROJECT_DIR/venv/bin/pip install -r $PROJECT_DIR/requirements-optional.txt; then
+    log_success "可选依赖安装成功"
+else
+    log_warning "部分可选依赖安装失败，核心功能不受影响"
+    
+    # 尝试安装最重要的可选依赖
+    OPTIONAL_PACKAGES=(
+        "ta>=0.10.0"
+        "matplotlib>=3.7.0"
+        "sqlalchemy>=2.0.0"
+    )
+    
+    for package in "${OPTIONAL_PACKAGES[@]}"; do
+        if sudo -u $SERVICE_USER $PROJECT_DIR/venv/bin/pip install "$package"; then
+            log_success "✓ $package (可选)"
+        else
+            log_info "✗ $package (可选，跳过)"
+        fi
+    done
+fi
+
+# 验证核心功能
+log_info "验证核心依赖..."
+if sudo -u $SERVICE_USER $PROJECT_DIR/venv/bin/python -c "
+import sys, importlib
+required_modules = ['pandas', 'numpy', 'ccxt', 'requests', 'openai', 'dotenv']
+missing = []
+for module in required_modules:
+    try:
+        importlib.import_module(module.replace('-', '_'))
+    except ImportError:
+        missing.append(module)
+        
+if missing:
+    print(f'Missing critical modules: {missing}')
+    sys.exit(1)
+else:
+    print('All critical modules available')
+"; then
+    log_success "核心依赖验证通过"
+else
+    log_error "核心依赖验证失败，系统可能无法正常运行"
+fi
+
+# 再次清理临时文件
+sudo -u $SERVICE_USER find $PROJECT_DIR -name "=*" -type f -delete 2>/dev/null || true
 
 log_success "Python 依赖安装完成"
 

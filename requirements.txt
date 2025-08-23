@@ -1,28 +1,45 @@
-# Core dependencies
+# AI交易系统完整依赖列表
+# 建议使用分层安装：
+# 1. pip install -r requirements-core.txt     (必需依赖)
+# 2. pip install -r requirements-optional.txt (可选依赖)
+
+# === 核心依赖 (必需) ===
+# AI模型和API通信
 openai>=1.0.0
 python-dotenv>=1.0.0
 requests>=2.31.0
+
+# 数据处理核心
 pandas>=2.0.0
 numpy>=1.24.0
 
-# Data fetching
+# 加密货币交易所连接
 ccxt>=4.0.0
 python-binance>=1.0.17
 
-# Technical analysis  
-ta>=0.10.0
-talib-binary>=0.4.0
+# 实时通信
+websockets>=11.0.0
+aiohttp>=3.8.0
 
-# Visualization
+# 基础工具
+python-dateutil>=2.8.0
+pytz>=2023.3
+
+# === 可选依赖 (增强功能) ===
+# 技术分析工具
+ta>=0.10.0
+# talib-binary>=0.4.0  # 已知问题，已禁用
+
+# 数据可视化
 matplotlib>=3.7.0
 plotly>=5.15.0
 
-# Utilities
-python-dateutil>=2.8.0
-pytz>=2023.3
-aiohttp>=3.8.0
-websockets>=11.0.0
-
-# Optional: Jupyter for testing
+# 开发和测试工具
 jupyter>=1.0.0
 ipykernel>=6.0.0
+
+# 数据库支持
+sqlalchemy>=2.0.0
+
+# 性能分析
+psutil>=5.9.0

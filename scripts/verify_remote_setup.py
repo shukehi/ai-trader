@@ -239,6 +239,7 @@ class RemoteDevValidator:
         vscode_dir = self.project_dir / ".vscode"
         if not vscode_dir.exists():
             print_error(".vscode目录不存在")
+            print_info("可运行: python scripts/fix_vscode_config.sh 自动修复")
             self.results['vscode_config'] = False
             return False
             
@@ -250,7 +251,9 @@ class RemoteDevValidator:
             'extensions.json': '扩展推荐'
         }
         
-        all_present = True
+        valid_files = 0
+        total_files = len(config_files)
+        
         for filename, description in config_files.items():
             file_path = vscode_dir / filename
             if file_path.exists():
@@ -261,17 +264,82 @@ class RemoteDevValidator:
                     with open(file_path, 'r', encoding='utf-8') as f:
                         json.load(f)
                     print_success(f"{filename} JSON格式正确")
+                    valid_files += 1
                 except json.JSONDecodeError:
                     print_error(f"{filename} JSON格式错误")
-                    all_present = False
+                    print_info(f"可运行: python scripts/fix_vscode_config.sh 修复")
                 except Exception as e:
                     print_warning(f"读取{filename}时出错: {e}")
             else:
                 print_warning(f"{description}文件缺失: {filename}")
-                all_present = False
+                print_info(f"可运行: python scripts/fix_vscode_config.sh 自动创建")
+        
+        # 根据有效文件比例判断
+        success_rate = valid_files / total_files
+        if success_rate >= 0.75:  # 75%以上文件有效
+            self.results['vscode_config'] = True
+            print_success(f"VS Code配置基本正常 ({valid_files}/{total_files} 文件有效)")
+            return True
+        else:
+            self.results['vscode_config'] = False
+            print_warning(f"VS Code配置需要修复 ({valid_files}/{total_files} 文件有效)")
+            return False
+
+    def check_git_configuration(self) -> bool:
+        """检查Git配置和权限"""
+        print_header("Git配置验证")
+        
+        if not (self.project_dir / ".git").exists():
+            print_error("不是Git仓库")
+            self.results['git_config'] = False
+            return False
+            
+        # 测试Git命令
+        try:
+            result = subprocess.run(
+                ['git', 'status'], 
+                cwd=self.project_dir,
+                capture_output=True, 
+                text=True, 
+                timeout=10
+            )
+            
+            if result.returncode == 0:
+                print_success("Git仓库状态正常")
+            else:
+                print_error("Git权限问题")
+                if "dubious ownership" in result.stderr:
+                    print_info("可运行: bash scripts/fix_git_permissions.sh --fix 修复")
+                self.results['git_config'] = False
+                return False
                 
-        self.results['vscode_config'] = all_present
-        return all_present
+        except subprocess.TimeoutExpired:
+            print_error("Git命令超时")
+            self.results['git_config'] = False
+            return False
+        except Exception as e:
+            print_error(f"Git测试失败: {e}")
+            self.results['git_config'] = False
+            return False
+            
+        # 检查安全目录配置
+        try:
+            result = subprocess.run(
+                ['git', 'config', '--global', '--get-all', 'safe.directory'],
+                capture_output=True, text=True, timeout=5
+            )
+            
+            if str(self.project_dir) in result.stdout:
+                print_success("Git安全目录已配置")
+            else:
+                print_warning("Git安全目录未配置")
+                print_info("可运行: git config --global --add safe.directory " + str(self.project_dir))
+                
+        except Exception:
+            print_info("无法检查Git安全目录配置")
+            
+        self.results['git_config'] = True
+        return True
 
     def check_system_services(self) -> bool:
         """检查系统服务状态"""
@@ -399,19 +467,33 @@ class RemoteDevValidator:
         """显示改进建议"""
         print_header("改进建议")
         
+        recommendations = []
+        
         if not self.results.get('user_exists', True):
-            print_info("🔧 运行用户设置脚本: sudo scripts/setup_remote_dev_user.sh")
+            recommendations.append("🔧 运行用户设置脚本: sudo scripts/setup_remote_dev_user.sh")
             
         if not self.results.get('python_env', True):
-            print_info("🐍 设置Python环境: python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt")
+            recommendations.append("🐍 设置Python环境: python3 -m venv venv && source venv/bin/activate && pip install -r requirements-core.txt")
             
         if not self.results.get('ssh_config', True):
-            print_info("🔑 配置SSH密钥: ssh-keygen -t ed25519 -C 'ai-trader-dev' -f ~/.ssh/ai-trader-dev")
+            recommendations.append("🔑 配置SSH密钥: ssh-keygen -t ed25519 -C 'ai-trader-dev' -f ~/.ssh/ai-trader-dev")
             
         if not self.results.get('vscode_config', True):
-            print_info("📝 VS Code配置已创建在.vscode/目录，请安装推荐扩展")
+            recommendations.append("📝 修复VS Code配置: bash scripts/fix_vscode_config.sh")
             
+        if not self.results.get('git_config', True):
+            recommendations.append("📂 修复Git权限: bash scripts/fix_git_permissions.sh --fix")
+            
+        # 显示具体的修复建议
+        if recommendations:
+            for rec in recommendations:
+                print_info(rec)
+        else:
+            print_success("🎉 环境配置完善，无需额外操作")
+            
+        print()
         print_info("📖 详细配置指南: docs/setup/REMOTE_SSH_SETUP.md")
+        print_info("🛠️ 一键修复所有问题: bash scripts/fix_all_issues.sh")
 
 def main():
     """主函数"""
@@ -436,6 +518,7 @@ def main():
     validator.check_project_directory()
     validator.check_python_environment()
     validator.check_ssh_configuration()
+    validator.check_git_configuration()
     validator.check_vscode_configuration()
     validator.check_system_services()
     

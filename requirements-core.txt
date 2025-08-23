@@ -1,0 +1,23 @@
+# 核心依赖 - AI交易系统必需组件
+# 这些依赖必须成功安装，否则系统无法运行
+
+# AI模型和API通信
+openai>=1.0.0
+python-dotenv>=1.0.0
+requests>=2.31.0
+
+# 数据处理核心
+pandas>=2.0.0
+numpy>=1.24.0
+
+# 加密货币交易所连接
+ccxt>=4.0.0
+python-binance>=1.0.17
+
+# 实时通信
+websockets>=11.0.0
+aiohttp>=3.8.0
+
+# 基础工具
+python-dateutil>=2.8.0
+pytz>=2023.3
