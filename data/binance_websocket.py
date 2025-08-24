@@ -15,7 +15,7 @@ import websockets
 import json
 import logging
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Callable, Any
+from typing import Dict, List, Optional, Callable, Any, Union, Awaitable
 from dataclasses import dataclass, field
 from enum import Enum
 import time
@@ -91,11 +91,11 @@ class BinanceWebSocketClient:
         """初始化WebSocket客户端"""
         self.config = config or StreamConfig()
         self.connection_state = ConnectionState.DISCONNECTED
-        self.websocket: Optional[websockets.WebSocketServerProtocol] = None
+        self.websocket: Optional[Any] = None
         
-        # 回调函数
-        self.kline_callbacks: Dict[str, List[Callable]] = {}
-        self.connection_callbacks: List[Callable] = []
+        # 回调函数 - 支持同步和异步回调
+        self.kline_callbacks: Dict[str, List[Union[Callable[[KlineData], None], Callable[[KlineData], Awaitable[None]]]]] = {}
+        self.connection_callbacks: List[Union[Callable[[ConnectionState], None], Callable[[ConnectionState], Awaitable[None]]]] = []
         self.error_callbacks: List[Callable] = []
         
         # 连接管理
@@ -118,14 +118,14 @@ class BinanceWebSocketClient:
         logger.info(f"📊 监控时间框架: {', '.join(self.config.timeframes)}")
         logger.info(f"💱 监控交易对: {self.config.symbol}")
     
-    def add_kline_callback(self, timeframe: str, callback: Callable[[KlineData], None]):
+    def add_kline_callback(self, timeframe: str, callback: Union[Callable[[KlineData], None], Callable[[KlineData], Awaitable[None]]]):
         """添加K线数据回调函数"""
         if timeframe not in self.kline_callbacks:
             self.kline_callbacks[timeframe] = []
         self.kline_callbacks[timeframe].append(callback)
         logger.info(f"📋 添加K线回调: {timeframe}")
     
-    def add_connection_callback(self, callback: Callable[[ConnectionState], None]):
+    def add_connection_callback(self, callback: Union[Callable[[ConnectionState], None], Callable[[ConnectionState], Awaitable[None]]]):
         """添加连接状态回调函数"""
         self.connection_callbacks.append(callback)
     
@@ -195,6 +195,10 @@ class BinanceWebSocketClient:
     
     async def _listen_messages(self):
         """监听WebSocket消息"""
+        if self.websocket is None:
+            logger.error("WebSocket连接为空，无法监听消息")
+            return
+            
         try:
             async for message in self.websocket:
                 await self._handle_message(message)

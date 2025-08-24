@@ -48,9 +48,8 @@ class BinanceFetcher:
         """
         # 重试机制
         max_retries = 3
-        retry_count = 0
         
-        while retry_count < max_retries:
+        for retry_count in range(max_retries):
             try:
                 logger.info(f"获取 {symbol} {timeframe} 数据，数量: {limit}")
                 
@@ -84,15 +83,17 @@ class BinanceFetcher:
                 return df
                 
             except Exception as e:
-                retry_count += 1
-                if retry_count < max_retries:
-                    wait_time = retry_count * 2  # 指数退避
-                    logger.warning(f"获取数据失败 (重试 {retry_count}/{max_retries}): {e}")
+                if retry_count < max_retries - 1:
+                    wait_time = (retry_count + 1) * 2  # 指数退避
+                    logger.warning(f"获取数据失败 (重试 {retry_count + 1}/{max_retries}): {e}")
                     logger.info(f"等待 {wait_time} 秒后重试...")
                     time.sleep(wait_time)
                 else:
                     logger.error(f"获取数据最终失败: {e}")
                     raise
+        
+        # 理论上不应该到达这里，但为了类型检查器
+        raise RuntimeError("获取数据失败：超出最大重试次数")
     
     def get_latest_price(self, symbol: str = 'ETH/USDT') -> Dict[str, Any]:
         """获取最新价格信息"""
@@ -128,8 +129,15 @@ class BinanceFetcher:
             # Binance 支持资金费率查询
             if hasattr(self.exchange, 'fetch_funding_rate'):
                 funding = self.exchange.fetch_funding_rate(symbol)
-                logger.info(f"当前资金费率: {funding.get('fundingRate', 'N/A')}")
-                return funding
+                if isinstance(funding, dict):
+                    logger.info(f"当前资金费率: {funding.get('fundingRate', 'N/A')}")
+                    return dict(funding)  # Ensure it's a proper Dict[str, Any]
+                elif funding:
+                    # 处理非字典类型的数据
+                    logger.info(f"当前资金费率: {funding}")
+                    return {'funding_rate_data': str(funding)}
+                else:
+                    return {}
             else:
                 logger.warning("当前交易所不支持资金费率查询")
                 return {}
@@ -191,8 +199,15 @@ class BinanceFetcher:
             # 尝试获取持仓量数据
             if hasattr(self.exchange, 'fetch_open_interest'):
                 oi_data = self.exchange.fetch_open_interest(symbol)
-                logger.info(f"当前持仓量: {oi_data.get('openInterestAmount', 'N/A')}")
-                return oi_data
+                if isinstance(oi_data, dict):
+                    logger.info(f"当前持仓量: {oi_data.get('openInterestAmount', 'N/A')}")
+                    return oi_data
+                elif oi_data:
+                    # 处理非字典类型的数据
+                    logger.info(f"当前持仓量: {oi_data}")
+                    return {'open_interest_data': str(oi_data)}
+                else:
+                    return {}
             else:
                 # 备选方法：通过ticker获取
                 ticker = self.exchange.fetch_ticker(symbol)

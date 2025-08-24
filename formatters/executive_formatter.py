@@ -16,8 +16,8 @@ class ExecutiveFormatter:
     def __init__(self):
         self.price_calculator = PriceActionCalculator()
     
-    def format_trading_signal_data(self, df: pd.DataFrame, vsa_analysis: Dict = None, 
-                                   funding_rate: float = None, open_interest: float = None) -> str:
+    def format_trading_signal_data(self, df: pd.DataFrame, vsa_analysis: Optional[Dict] = None, 
+                                   funding_rate: Optional[float] = None, open_interest: Optional[float] = None) -> str:
         """格式化交易信号数据（简洁版）"""
         current_price = df['close'].iloc[-1]
         
@@ -110,7 +110,7 @@ class ExecutiveFormatter:
             lines.append(f"${row['close']:.2f}{change}")
         return " → ".join(lines)
 
-    def format_executive_summary_data(self, df: pd.DataFrame, analysis_result: str = None) -> str:
+    def format_executive_summary_data(self, df: pd.DataFrame, analysis_result: Optional[str] = None) -> str:
         """执行摘要数据格式"""
         current_price = df['close'].iloc[-1]
         daily_change = ((df['close'].iloc[-1] - df['close'].iloc[-24]) / df['close'].iloc[-24]) * 100

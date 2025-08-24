@@ -61,7 +61,7 @@ class RemoteDevValidator:
         self.project_dir = Path(project_dir)
         self.dev_user = dev_user
         self.current_user = pwd.getpwuid(os.getuid()).pw_name
-        self.results = {}
+        self.results: dict[str, bool] = {}
         
     def run_command(self, command: str, capture_output: bool = True) -> Tuple[bool, str]:
         """运行命令并返回结果"""

@@ -4,13 +4,11 @@
 防止单一模型幻觉，提供交叉验证和共识机制
 """
 
-import asyncio
 import time
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import json
 
 from .openrouter_client import OpenRouterClient
 from .consensus_calculator import ConsensusCalculator
@@ -20,8 +18,8 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ValidationConfig:
     """验证配置 (优化版 - 对抗模型偏差)"""
-    primary_models: List[str] = None
-    validation_models: List[str] = None  
+    primary_models: Optional[List[str]] = None
+    validation_models: Optional[List[str]] = None  
     consensus_threshold: float = 0.7      # 提高阈值确保质量
     enable_arbitration: bool = True       # 启用仲裁处理分歧
     max_models: int = 3                   # 专注于高质量模型
@@ -118,9 +116,9 @@ class MultiModelValidator:
             
             # 准备主要分析和验证分析
             primary_results = {k: v for k, v in successful_results.items() 
-                             if k in self.config.primary_models}
+                             if self.config.primary_models and k in self.config.primary_models}
             validation_results = {k: v for k, v in successful_results.items() 
-                                if k in self.config.validation_models}
+                                if self.config.validation_models and k in self.config.validation_models}
             
             # 执行仲裁（如果需要）
             arbitration_result = None
@@ -164,9 +162,11 @@ class MultiModelValidator:
     def _select_models(self, enable_fast_mode: bool) -> List[str]:
         """选择要使用的模型"""
         if enable_fast_mode:
-            return self.config.primary_models[:2]  # 只用前2个主要模型
+            return (self.config.primary_models or [])[:2]  # 只用前2个主要模型
         
-        all_models = self.config.primary_models + self.config.validation_models
+        primary_models = self.config.primary_models or []
+        validation_models = self.config.validation_models or []
+        all_models = primary_models + validation_models
         return all_models[:self.config.max_models]
     
     def _get_model_timeout(self, model: str) -> int:

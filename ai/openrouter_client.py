@@ -83,9 +83,9 @@ class OpenRouterClient:
                 'model_id': model_id,
                 'analysis': response.choices[0].message.content,
                 'usage': {
-                    'prompt_tokens': response.usage.prompt_tokens,
-                    'completion_tokens': response.usage.completion_tokens,
-                    'total_tokens': response.usage.total_tokens
+                    'prompt_tokens': response.usage.prompt_tokens if response.usage else 0,
+                    'completion_tokens': response.usage.completion_tokens if response.usage else 0,
+                    'total_tokens': response.usage.total_tokens if response.usage else 0
                 },
                 'response_time': end_time - start_time,
                 'analysis_type': analysis_type
@@ -243,7 +243,7 @@ class OpenRouterClient:
         """获取可用的模型列表"""
         return self.models.copy()
     
-    def estimate_cost(self, model_name: str, prompt_tokens: int, completion_tokens: int) -> Dict[str, float]:
+    def estimate_cost(self, model_name: str, prompt_tokens: int, completion_tokens: int) -> Dict[str, Any]:
         """
         估算调用成本 (2025年OpenRouter价格，per 1K tokens)
         """
@@ -344,9 +344,9 @@ class OpenRouterClient:
                 'model_id': model_id,
                 'analysis': response.choices[0].message.content,
                 'usage': {
-                    'prompt_tokens': response.usage.prompt_tokens,
-                    'completion_tokens': response.usage.completion_tokens,
-                    'total_tokens': response.usage.total_tokens
+                    'prompt_tokens': response.usage.prompt_tokens if response.usage else 0,
+                    'completion_tokens': response.usage.completion_tokens if response.usage else 0,
+                    'total_tokens': response.usage.total_tokens if response.usage else 0
                 },
                 'response_time': end_time - start_time
             }

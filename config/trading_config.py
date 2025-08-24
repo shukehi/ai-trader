@@ -41,9 +41,9 @@ class RiskManagement:
     emergency_stop_drawdown: float = 0.15
     
     # 各风险等级设置
-    conservative: RiskLevel = None
-    moderate: RiskLevel = None
-    aggressive: RiskLevel = None
+    conservative: Optional[RiskLevel] = None
+    moderate: Optional[RiskLevel] = None
+    aggressive: Optional[RiskLevel] = None
     
     def __post_init__(self):
         if self.conservative is None:
@@ -71,8 +71,8 @@ class AIAnalysis:
     analysis_timeout: int = 90            # 增加超时以适应多模型
     retry_attempts: int = 3
     # 模型偏差对抗设置
-    primary_models: list = None           # 主要分析模型
-    validation_models: list = None        # 验证模型
+    primary_models: Optional[list[str]] = None           # 主要分析模型
+    validation_models: Optional[list[str]] = None        # 验证模型
     consensus_threshold: float = 0.7      # 提高共识阈值确保质量
     
     def __post_init__(self):
@@ -102,7 +102,7 @@ class Logging:
     enable_ai_decision_logging: bool = True
     enable_risk_event_logging: bool = True
     log_retention_days: int = 90
-    export_formats: list = None
+    export_formats: Optional[list[str]] = None
     auto_backup: bool = True
     
     def __post_init__(self):
@@ -186,11 +186,15 @@ class TradingConfig:
             risk_data = trading_config.get('risk_management', {})
             risk_levels = risk_data.get('risk_levels', {})
             
+            conservative = RiskLevel(**risk_levels.get('conservative', {})) if risk_levels.get('conservative') else None
+            moderate = RiskLevel(**risk_levels.get('moderate', {})) if risk_levels.get('moderate') else None
+            aggressive = RiskLevel(**risk_levels.get('aggressive', {})) if risk_levels.get('aggressive') else None
+            
             self.risk_management = RiskManagement(
                 **{k: v for k, v in risk_data.items() if k != 'risk_levels'},
-                conservative=RiskLevel(**risk_levels.get('conservative', {})) if risk_levels.get('conservative') else None,
-                moderate=RiskLevel(**risk_levels.get('moderate', {})) if risk_levels.get('moderate') else None,
-                aggressive=RiskLevel(**risk_levels.get('aggressive', {})) if risk_levels.get('aggressive') else None
+                conservative=conservative,
+                moderate=moderate,
+                aggressive=aggressive
             )
             
             # 信号执行设置
@@ -247,9 +251,9 @@ class TradingConfig:
                         **{k: v for k, v in asdict(self.risk_management).items() 
                            if k not in ['conservative', 'moderate', 'aggressive']},
                         "risk_levels": {
-                            "conservative": asdict(self.risk_management.conservative),
-                            "moderate": asdict(self.risk_management.moderate),
-                            "aggressive": asdict(self.risk_management.aggressive)
+                            "conservative": asdict(self.risk_management.conservative) if self.risk_management.conservative else None,
+                            "moderate": asdict(self.risk_management.moderate) if self.risk_management.moderate else None,
+                            "aggressive": asdict(self.risk_management.aggressive) if self.risk_management.aggressive else None
                         }
                     },
                     
@@ -359,7 +363,7 @@ class TradingConfig:
         except Exception as e:
             logger.error(f"从命令行参数覆盖配置失败: {e}")
     
-    def get_risk_level_settings(self, level: str = None) -> RiskLevel:
+    def get_risk_level_settings(self, level: Optional[str] = None) -> RiskLevel:
         """获取指定风险等级设置"""
         if level is None:
             level = self.risk_management.default_risk_level
@@ -370,7 +374,9 @@ class TradingConfig:
             'aggressive': self.risk_management.aggressive
         }
         
-        return level_map.get(level, self.risk_management.moderate)
+        result = level_map.get(level, self.risk_management.moderate)
+        assert result is not None, "Risk level should never be None after initialization"
+        return result
     
     def validate_config(self) -> Dict[str, Any]:
         """验证配置有效性"""

@@ -114,7 +114,7 @@ class FlagshipModelTester:
             usage = response.usage
             
             # 分析质量评分
-            quality_score = self._evaluate_vpa_analysis_quality(analysis)
+            quality_score = self._evaluate_vpa_analysis_quality(analysis or "")
             
             return {
                 'model': model_name,
@@ -122,13 +122,13 @@ class FlagshipModelTester:
                 'analysis': analysis,
                 'response_time': end_time - start_time,
                 'token_usage': {
-                    'prompt_tokens': usage.prompt_tokens,
-                    'completion_tokens': usage.completion_tokens,
-                    'total_tokens': usage.total_tokens
+                    'prompt_tokens': usage.prompt_tokens if usage else 0,
+                    'completion_tokens': usage.completion_tokens if usage else 0,
+                    'total_tokens': usage.total_tokens if usage else 0
                 },
                 'quality_metrics': quality_score,
                 'cost_estimate': self.client.estimate_cost(
-                    model_name, usage.prompt_tokens, usage.completion_tokens
+                    model_name, usage.prompt_tokens if usage else 0, usage.completion_tokens if usage else 0
                 )
             }
             
@@ -165,22 +165,22 @@ class FlagshipModelTester:
             'volume spread', 'no demand', 'no supply'
         ]
         found_vpa = sum(1 for term in vpa_terms if term in analysis_lower)
-        scores['vpa_terminology'] = min(found_vpa / len(vpa_terms) * 30, 30)
+        scores['vpa_terminology'] = min(int(found_vpa / len(vpa_terms) * 30), 30)
         
         # 市场阶段判断 (25分)
         stage_indicators = ['阶段', '当前', '判断', '置信度', 'phase']
         found_stage = sum(1 for term in stage_indicators if term in analysis_lower)
-        scores['market_stage_clarity'] = min(found_stage / len(stage_indicators) * 25, 25)
+        scores['market_stage_clarity'] = min(int(found_stage / len(stage_indicators) * 25), 25)
         
         # 可操作建议 (25分)
         action_terms = ['建议', '进场', '止损', '目标', '操作', '买入', '卖出']
         found_action = sum(1 for term in action_terms if term in analysis)
-        scores['actionable_advice'] = min(found_action / len(action_terms) * 25, 25)
+        scores['actionable_advice'] = min(int(found_action / len(action_terms) * 25), 25)
         
         # 风险管理 (10分)
         risk_terms = ['风险', '仓位', '管理', 'risk', '止损']
         found_risk = sum(1 for term in risk_terms if term in analysis)
-        scores['risk_management'] = min(found_risk / len(risk_terms) * 10, 10)
+        scores['risk_management'] = min(int(found_risk / len(risk_terms) * 10), 10)
         
         # 专业深度 (10分) - 基于分析长度和结构
         if len(analysis) > 1000:

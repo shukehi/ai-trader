@@ -16,7 +16,7 @@ import logging
 import sys
 import signal
 from datetime import datetime, timedelta
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 import json
 
 # 设置项目路径
@@ -267,7 +267,7 @@ class WebSocketVPADemo:
         print("⏱️ 实时监控中... (Ctrl+C 停止)")
         print()
     
-    async def _on_vpa_result(self, result: AnalysisResult):
+    def _on_vpa_result(self, result: AnalysisResult):
         """VPA结果回调"""
         self.analyzer.analyze_vpa_result(result)
         

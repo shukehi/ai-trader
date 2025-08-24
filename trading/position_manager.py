@@ -275,7 +275,7 @@ class PositionManager:
                 position_risks[symbol] = {
                     'margin_ratio': position_risk,
                     'pnl': unrealized_pnl,
-                    'heat_level': self.position_metrics.get(symbol, {}).get('heat_level', 3)
+                    'heat_level': self.position_metrics.get(symbol, PositionMetrics("", 0, 0, 0, 0, 0, 0, 0, 3, 0)).heat_level
                 }
             
             # 组合风险指标
