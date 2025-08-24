@@ -1,125 +1,17 @@
 {
-    // Python解释器配置
     "python.defaultInterpreterPath": "/opt/ai-trader/venv/bin/python",
     "python.terminal.activateEnvironment": true,
     "python.terminal.activateEnvInCurrentTerminal": true,
-    
-    // Python Linting配置
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,
-    "python.linting.flake8Enabled": false,
-    "python.linting.mypyEnabled": false,
-    
-    // Python格式化配置
-    "python.formatting.provider": "autopep8",
-    "python.formatting.autopep8Args": [
-        "--max-line-length=120"
-    ],
-    
-    // 代码分析配置
-    "python.analysis.typeCheckingMode": "basic",
-    "python.analysis.autoSearchPaths": true,
-    "python.analysis.diagnosticMode": "workspace",
-    
-    // 终端配置
     "terminal.integrated.cwd": "/opt/ai-trader",
-    "terminal.integrated.defaultProfile.linux": "bash",
-    "terminal.integrated.profiles.linux": {
-        "bash": {
-            "path": "bash",
-            "args": ["-l"]
-        }
-    },
-    
-    // 文件监控排除配置（提高性能）
     "files.watcherExclude": {
         "**/venv/**": true,
         "**/logs/**": true,
         "**/data/cache/**": true,
-        "**/results/**": true,
-        "**/__pycache__/**": true,
-        "**/*.pyc": true,
-        "**/node_modules/**": true,
-        "**/.git/**": true
+        "**/__pycache__/**": true
     },
-    
-    // 搜索排除配置
-    "search.exclude": {
-        "**/venv/**": true,
-        "**/logs/**": true,
-        "**/data/cache/**": true,
-        "**/__pycache__/**": true,
-        "**/*.pyc": true
-    },
-    
-    // 文件关联配置
-    "files.associations": {
-        "*.env": "properties",
-        "*.log": "log",
-        "CLAUDE.md": "markdown",
-        "trading_config.json": "json"
-    },
-    
-    // 编辑器配置
     "editor.rulers": [120],
     "editor.tabSize": 4,
-    "editor.insertSpaces": true,
-    "editor.detectIndentation": false,
-    "editor.trimAutoWhitespace": true,
-    "editor.wordWrap": "on",
-    
-    // Git配置
-    "git.enabled": true,
-    "git.autorefresh": true,
-    "git.autofetch": true,
-    
-    // 自动保存配置
-    "files.autoSave": "onFocusChange",
-    "files.autoSaveDelay": 1000,
-    
-    // JSON文件格式化
-    "[json]": {
-        "editor.defaultFormatter": "vscode.json-language-features",
-        "editor.formatOnSave": true
-    },
-    
-    // Python文件格式化
-    "[python]": {
-        "editor.formatOnSave": true,
-        "editor.codeActionsOnSave": {
-            "source.organizeImports": true
-        }
-    },
-    
-    // Markdown文件配置
-    "[markdown]": {
-        "editor.wordWrap": "on",
-        "editor.lineNumbers": "on"
-    },
-    
-    // 远程开发特定配置
-    "remote.SSH.remotePlatform": {
-        "ai-trader-vps": "linux"
-    },
-    "remote.SSH.defaultExtensions": [
-        "ms-python.python",
-        "ms-python.flake8",
-        "eamodio.gitlens",
-        "rangav.vscode-thunder-client",
-        "ms-vscode.vscode-json"
-    ],
-    
-    // AI Trader项目特定配置
-    "python.envFile": "/opt/ai-trader/.env",
-    
-    // 扩展推荐配置
-    "extensions.showRecommendationsOnlyOnDemand": false,
-    
-    // 性能优化配置
-    "typescript.preferences.includePackageJsonAutoImports": "off",
-    "javascript.preferences.includePackageJsonAutoImports": "off",
-    
-    // 调试配置
-    "debug.console.fontSize": 14,
-    "debug.console.lineHeight": 18
+    "files.autoSave": "onFocusChange"
 }

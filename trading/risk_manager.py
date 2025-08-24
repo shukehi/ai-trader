@@ -200,6 +200,11 @@ class RiskManager:
                 risk_per_unit = abs(entry_price - stop_loss)
                 total_risk = risk_per_unit * position_size
                 risk_ratio = total_risk / total_balance
+            elif position_size:
+                # 未提供止损时，采用保守估算：价格不利波动1%作为单位风险
+                conservative_move = entry_price * 0.01
+                total_risk = conservative_move * position_size
+                risk_ratio = total_risk / total_balance
             else:
                 # 使用默认风险比例估算
                 settings = self.risk_level_settings[self.current_risk_level]

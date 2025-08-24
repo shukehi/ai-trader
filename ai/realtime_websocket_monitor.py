@@ -161,6 +161,17 @@ class WebSocketVPAMonitor:
             'analyses_by_timeframe': {tf: 0 for tf in self.timeframe_configs.keys()},
             'connection_uptime': 0.0
         }
+
+        # 连接诊断信息（握手/重连/退避）
+        self.connection_diag = {
+            'connect_attempts': 0,
+            'last_connect_started_at': None,
+            'last_connected_at': None,
+            'last_connect_duration_sec': None,
+            'consecutive_failures': 0,
+            'last_error': None,
+            'predicted_backoff_sec': None,
+        }
         
         logger.info(f"🚀 WebSocket VPA监控器初始化完成")
         logger.info(f"💱 监控交易对: {self.symbol}")
@@ -213,7 +224,12 @@ class WebSocketVPAMonitor:
             
             logger.info(f"🔧 启动{len(analysis_workers)}个分析工作器")
             
-            # 4. 连接WebSocket
+            # 4. 连接WebSocket（记录握手诊断）
+            url = self.ws_client.config.get_combined_stream_url()
+            logger.info(f"🧪 握手开始: {url} | timeframes={enabled_timeframes}")
+            self.connection_diag['connect_attempts'] = (self.connection_diag.get('connect_attempts') or 0) + 1
+            self.connection_diag['last_connect_started_at'] = datetime.now().isoformat()
+
             await self.ws_client.connect()
             
             # 5. 运行主监控循环
@@ -269,7 +285,7 @@ class WebSocketVPAMonitor:
         except Exception as e:
             logger.error(f"❌ K线完成处理错误: {e}")
             self._trigger_error_callbacks(e)
-    
+
     def _should_analyze(self, timeframe: str, config: Dict[str, Any]) -> bool:
         """判断是否应该执行分析"""
         # 检查每日分析次数限制
@@ -410,6 +426,45 @@ class WebSocketVPAMonitor:
                 success=False,
                 error=str(e)
             )
+
+    # --- 连接状态与错误回调（增强诊断） ---
+    def _on_connection_state_change(self, state: ConnectionState):
+        try:
+            if state == ConnectionState.CONNECTING:
+                self.connection_diag['connect_attempts'] = (self.connection_diag.get('connect_attempts') or 0) + 1
+                self.connection_diag['last_connect_started_at'] = datetime.now().isoformat()
+                logger.info("🤝 开始WebSocket握手…")
+            elif state == ConnectionState.CONNECTED:
+                self.connection_diag['last_connected_at'] = datetime.now().isoformat()
+                # 计算握手耗时
+                try:
+                    start_iso = self.connection_diag.get('last_connect_started_at')
+                    if start_iso:
+                        dt = datetime.fromisoformat(start_iso)
+                        self.connection_diag['last_connect_duration_sec'] = (datetime.now() - dt).total_seconds()
+                except Exception:
+                    pass
+                self.connection_diag['consecutive_failures'] = 0
+                logger.info(f"✅ 握手成功，用时: {self.connection_diag.get('last_connect_duration_sec')}s")
+            elif state == ConnectionState.RECONNECTING:
+                # 预测下一次退避时长（与底层客户端逻辑一致）
+                try:
+                    attempts = getattr(self.ws_client, 'reconnect_attempts', 0) + 1
+                    base = getattr(self.ws_client, 'reconnect_delay', 5.0)
+                    predicted = min(base * (2 ** (attempts - 1)), 60)
+                    self.connection_diag['predicted_backoff_sec'] = predicted
+                    logger.warning(f"🔄 正在重连，第{attempts}次，预计退避 {predicted:.1f}s")
+                except Exception:
+                    logger.warning("🔄 正在重连…")
+            elif state in (ConnectionState.DISCONNECTED, ConnectionState.CLOSED):
+                logger.warning(f"🔌 连接状态: {state.value}")
+        except Exception as e:
+            logger.error(f"连接状态诊断错误: {e}")
+
+    def _on_websocket_error(self, error: Exception):
+        self.connection_diag['last_error'] = str(error)
+        self.connection_diag['consecutive_failures'] = (self.connection_diag.get('consecutive_failures') or 0) + 1
+        logger.error(f"🌩️ WebSocket错误: {error}")
     
     async def _get_analysis_data(self, timeframe: str, latest_kline: KlineData) -> 'pd.DataFrame':
         """获取分析所需的数据"""
@@ -581,6 +636,7 @@ class WebSocketVPAMonitor:
         }
         if self.ws_client:
             stats['websocket_stats'] = self.ws_client.get_stats()
+        stats['websocket_diag'] = self.connection_diag.copy()
         return stats
 
 # 使用示例和回调函数

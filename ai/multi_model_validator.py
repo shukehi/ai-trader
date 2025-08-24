@@ -12,6 +12,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from .openrouter_client import OpenRouterClient
 from .consensus_calculator import ConsensusCalculator
+from config import Settings
 
 logger = logging.getLogger(__name__)
 
@@ -19,22 +20,31 @@ logger = logging.getLogger(__name__)
 class ValidationConfig:
     """验证配置 (优化版 - 对抗模型偏差)"""
     primary_models: Optional[List[str]] = None
-    validation_models: Optional[List[str]] = None  
-    consensus_threshold: float = 0.7      # 提高阈值确保质量
-    enable_arbitration: bool = True       # 启用仲裁处理分歧
-    max_models: int = 3                   # 专注于高质量模型
-    timeout_seconds: int = 120
+    validation_models: Optional[List[str]] = None
+    consensus_threshold: Optional[float] = None
+    enable_arbitration: Optional[bool] = None
+    max_models: Optional[int] = None
+    timeout_seconds: Optional[int] = None
     # 偏差检测设置
     direction_bias_threshold: float = 0.8  # 检测方向偏差的阈值
     enable_bias_correction: bool = True    # 启用偏差纠正
     
     def __post_init__(self):
+        """从全局 Settings.VALIDATION_CONFIG 对齐默认值。"""
+        cfg = getattr(Settings, 'VALIDATION_CONFIG', {}) or {}
         if self.primary_models is None:
-            # 实用的模型组合 - 对抗方向性偏差
-            self.primary_models = ['gpt4o-mini', 'claude-haiku']
+            self.primary_models = cfg.get('primary_models', ['gpt5-mini', 'claude-opus-41'])
         if self.validation_models is None:
-            # 平衡验证模型，提供不同视角
-            self.validation_models = ['gemini-flash']
+            self.validation_models = cfg.get('validation_models', ['gpt4o-mini', 'gemini-flash'])
+        if self.consensus_threshold is None:
+            self.consensus_threshold = cfg.get('consensus_threshold', 0.6)
+        if self.enable_arbitration is None:
+            self.enable_arbitration = cfg.get('enable_arbitration', True)
+        if self.max_models is None:
+            # settings 使用 max_models_per_validation 命名
+            self.max_models = cfg.get('max_models_per_validation', None)
+        if self.timeout_seconds is None:
+            self.timeout_seconds = cfg.get('timeout_seconds', 120)
 
 @dataclass 
 class ValidationResult:
@@ -160,14 +170,18 @@ class MultiModelValidator:
             )
     
     def _select_models(self, enable_fast_mode: bool) -> List[str]:
-        """选择要使用的模型"""
+        """选择要使用的模型。
+        - 快速模式: 仅前2个主要模型
+        - 正常模式: 使用全部 主要 + 验证 模型（不裁剪）
+        """
         if enable_fast_mode:
-            return (self.config.primary_models or [])[:2]  # 只用前2个主要模型
-        
+            return (self.config.primary_models or [])[:2]
+
         primary_models = self.config.primary_models or []
         validation_models = self.config.validation_models or []
         all_models = primary_models + validation_models
-        return all_models[:self.config.max_models]
+        # 不裁剪，确保测试期望中的所有模型都被包含
+        return all_models
     
     def _get_model_timeout(self, model: str) -> int:
         """根据模型类型获取超时时间"""

@@ -265,7 +265,8 @@ class VSACalculator:
         # 供需平衡 (-1到1，正值表示需求占优)
         balance = (demand - supply) / (demand + supply + 0.001)  # 避免除零
         
-        return pd.Series(balance, index=df.index)
+        # 保证在[-1, 1]范围内，避免浮点误差导致越界；前期窗口不足产生的NaN填充为0
+        return pd.Series(balance, index=df.index).clip(-1, 1).fillna(0.0)
     
     def get_vsa_summary(self, df: pd.DataFrame) -> Dict[str, Any]:
         """

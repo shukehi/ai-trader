@@ -1,0 +1,42 @@
+[
+  {
+    "event_id": "3296827a",
+    "timestamp": 1756008606.5381138,
+    "event_type": "emergency_stop",
+    "symbol": null,
+    "severity": "critical",
+    "description": "紧急停止触发: 测试紧急停止",
+    "impact": 0.0,
+    "action_taken": "停止所有新开仓，准备清仓"
+  },
+  {
+    "event_id": "b6b13912",
+    "timestamp": 1756009411.5009673,
+    "event_type": "emergency_stop",
+    "symbol": null,
+    "severity": "critical",
+    "description": "紧急停止触发: 测试紧急停止",
+    "impact": 0.0,
+    "action_taken": "停止所有新开仓，准备清仓"
+  },
+  {
+    "event_id": "1fed963c",
+    "timestamp": 1756009543.5002022,
+    "event_type": "emergency_stop",
+    "symbol": null,
+    "severity": "critical",
+    "description": "紧急停止触发: 测试紧急停止",
+    "impact": 0.0,
+    "action_taken": "停止所有新开仓，准备清仓"
+  },
+  {
+    "event_id": "f7c22f3d",
+    "timestamp": 1756009573.0130913,
+    "event_type": "emergency_stop",
+    "symbol": null,
+    "severity": "critical",
+    "description": "紧急停止触发: 测试紧急停止",
+    "impact": 0.0,
+    "action_taken": "停止所有新开仓，准备清仓"
+  }
+]

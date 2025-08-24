@@ -373,7 +373,9 @@ class ConsensusCalculator:
         elif dimension == 'perpetual_factors':
             return self._calculate_list_consensus(model_signals, dimension)
         elif dimension == 'timeframe_consistency':
-            return self._calculate_categorical_consensus(model_signals, dimension)
+            # 对于缺失该维度的情况，返回温和中性分值避免惩罚基础一致性
+            score = self._calculate_categorical_consensus(model_signals, dimension)
+            return score if score > 0 else 0.4
         elif dimension == 'key_levels':
             return self._calculate_key_levels_consensus(model_signals)
         else:
@@ -411,7 +413,8 @@ class ConsensusCalculator:
                 model_count += 1
         
         if not all_values or model_count == 0:
-            return 0.0
+            # 缺失该维度时，返回温和中性分值，避免对核心一致性产生过度惩罚
+            return 0.4
         
         # 计算各类别的出现频率
         counter = Counter(all_values)

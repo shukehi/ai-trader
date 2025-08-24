@@ -78,7 +78,13 @@ class StreamConfig:
     def get_combined_stream_url(self) -> str:
         """获取组合数据流URL"""
         streams = '/'.join(self.get_stream_names())
-        return f"{self.base_url}stream?streams={streams}"
+        # Binance规范：组合流使用 /stream?streams= ，单流使用 /ws/<name>
+        # 若 base_url 以 /ws/ 结尾，需要回退到根路径
+        base = self.base_url
+        if base.endswith('/ws/'):
+            base = base[:-4]  # 去掉末尾 'ws/'
+        base = base.rstrip('/')
+        return f"{base}/stream?streams={streams}"
 
 class BinanceWebSocketClient:
     """
@@ -276,9 +282,15 @@ class BinanceWebSocketClient:
         self.stats['reconnect_count'] += 1
         self._set_connection_state(ConnectionState.RECONNECTING)
         
-        delay = min(self.reconnect_delay * (2 ** (self.reconnect_attempts - 1)), 60)  # 指数退避，最大60秒
-        
-        logger.info(f"🔄 第{self.reconnect_attempts}次重连尝试 (等待{delay}秒)...")
+        # 指数退避 + 抖动，最大60秒
+        base = min(self.reconnect_delay * (2 ** (self.reconnect_attempts - 1)), 60)
+        try:
+            import random
+            jitter = random.uniform(0.0, base * 0.25)
+        except Exception:
+            jitter = 0.0
+        delay = base + jitter
+        logger.info(f"🔄 第{self.reconnect_attempts}次重连尝试 (等待{delay:.2f}秒，基础{base:.2f}s + 抖动{jitter:.2f}s)...")
         await asyncio.sleep(delay)
         
         await self.connect()
