@@ -39,7 +39,7 @@ class TimeframeSignal:
     vpa_signal: Optional[str] = None
     price_direction: Optional[str] = None
     confidence: Optional[str] = None
-    vsa_signals: List[str] = None
+    vsa_signals: Optional[List[str]] = None
     signal_strength: float = 0.0
     
     def __post_init__(self):
@@ -52,7 +52,7 @@ class MultiTimeframeAnalysis:
     signals: List[TimeframeSignal]
     consensus_score: float
     conflicts: List[Dict[str, Any]]
-    primary_signal: TimeframeSignal
+    primary_signal: Optional[TimeframeSignal]
     context_bias: str  # bullish/bearish/neutral
     recommended_action: str
     confidence_level: str
@@ -109,7 +109,7 @@ class TimeframeAnalyzer:
         }
     
     def analyze_multiple_timeframes(self, symbol: str = 'ETH/USDT',
-                                  timeframes: List[str] = None) -> MultiTimeframeAnalysis:
+                                  timeframes: Optional[List[str]] = None) -> MultiTimeframeAnalysis:
         """
         执行多时间框架VPA分析
         
@@ -383,7 +383,7 @@ class TimeframeAnalyzer:
         
         return conflicts
     
-    def _determine_primary_signal(self, signals: List[TimeframeSignal]) -> TimeframeSignal:
+    def _determine_primary_signal(self, signals: List[TimeframeSignal]) -> Optional[TimeframeSignal]:
         """确定主要信号 (权重最高的)"""
         if not signals:
             return None

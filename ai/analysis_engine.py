@@ -29,6 +29,7 @@ class AnalysisEngine:
         self.processor = DataProcessor()
         
         # 初始化多模型验证器
+        self.validator: Optional[MultiModelValidator]
         if enable_validation:
             self.validator = MultiModelValidator(api_key)
             logger.info("✅ 多模型验证已启用")
@@ -108,7 +109,8 @@ class AnalysisEngine:
                     analysis_type='pattern'
                 )
                 
-                report['ai_analysis'][model] = {
+                ai_analysis = report['ai_analysis']
+                ai_analysis[model] = {  # type: ignore
                     'vpa_analysis': vpa_result,
                     'technical_analysis': technical_result,
                     'pattern_analysis': pattern_result,
@@ -373,7 +375,7 @@ class AnalysisEngine:
         # 使用共识计算器生成摘要
         all_results = {**validation_result.primary_analysis, **validation_result.validation_analyses}
         
-        if hasattr(self.validator, 'consensus_calc'):
+        if self.validator and hasattr(self.validator, 'consensus_calc'):
             consensus_summary = self.validator.consensus_calc.generate_consensus_summary(
                 all_results, validation_result.consensus_score
             )

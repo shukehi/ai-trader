@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from typing import Dict, List, Any, Optional
-import ta
+from ta import trend, momentum, volatility, volume  # type: ignore
 import logging
 from .vsa_calculator import VSACalculator
 
@@ -30,20 +30,20 @@ class DataProcessor:
         df = df.copy()
         
         # 移动平均线
-        df['sma_20'] = ta.trend.sma_indicator(df['close'], window=20)
-        df['ema_12'] = ta.trend.ema_indicator(df['close'], window=12)
-        df['ema_26'] = ta.trend.ema_indicator(df['close'], window=26)
+        df['sma_20'] = trend.sma_indicator(df['close'], window=20)
+        df['ema_12'] = trend.ema_indicator(df['close'], window=12)
+        df['ema_26'] = trend.ema_indicator(df['close'], window=26)
         
         # MACD
-        df['macd'] = ta.trend.macd_diff(df['close'])
-        df['macd_signal'] = ta.trend.macd_signal(df['close'])
-        df['macd_histogram'] = ta.trend.macd(df['close'])
+        df['macd'] = trend.macd_diff(df['close'])
+        df['macd_signal'] = trend.macd_signal(df['close'])
+        df['macd_histogram'] = trend.macd(df['close'])
         
         # RSI
-        df['rsi'] = ta.momentum.rsi(df['close'], window=14)
+        df['rsi'] = momentum.rsi(df['close'], window=14)
         
         # 布林带
-        bollinger = ta.volatility.BollingerBands(df['close'])
+        bollinger = volatility.BollingerBands(df['close'])
         df['bb_upper'] = bollinger.bollinger_hband()
         df['bb_middle'] = bollinger.bollinger_mavg()
         df['bb_lower'] = bollinger.bollinger_lband()
@@ -52,7 +52,7 @@ class DataProcessor:
         # 成交量指标 (修复ta库兼容性)
         df['volume_sma'] = df['volume'].rolling(window=20).mean()  # 手动计算成交量SMA
         try:
-            df['vwap'] = ta.volume.volume_weighted_average_price(df['high'], df['low'], df['close'], df['volume'])
+            df['vwap'] = volume.volume_weighted_average_price(df['high'], df['low'], df['close'], df['volume'])
         except:
             # VWAP手动计算
             df['vwap'] = (df['volume'] * (df['high'] + df['low'] + df['close']) / 3).cumsum() / df['volume'].cumsum()
@@ -62,7 +62,7 @@ class DataProcessor:
         df['price_change_abs'] = df['close'].diff()
         
         # 真实波幅
-        df['atr'] = ta.volatility.average_true_range(df['high'], df['low'], df['close'])
+        df['atr'] = volatility.average_true_range(df['high'], df['low'], df['close'])
         
         return df
     

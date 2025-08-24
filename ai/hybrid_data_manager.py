@@ -95,7 +95,7 @@ class HybridDataManager:
     智能管理WebSocket和REST数据源，确保数据完整性和系统稳定性
     """
     
-    def __init__(self, symbol: str = 'ETH/USDT', timeframes: List[str] = None):
+    def __init__(self, symbol: str = 'ETH/USDT', timeframes: Optional[List[str]] = None):
         """初始化混合数据管理器"""
         self.symbol = symbol
         self.timeframes = timeframes or ['5m', '15m', '30m', '1h', '4h', '1d']

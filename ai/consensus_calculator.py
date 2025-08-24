@@ -5,8 +5,7 @@
 """
 
 import re
-import json
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from collections import Counter
 import logging
@@ -20,10 +19,10 @@ class VPASignal:
     vpa_signal: Optional[str] = None    # bullish, bearish, neutral
     price_direction: Optional[str] = None  # up, down, sideways
     confidence: Optional[str] = None    # high, medium, low
-    vsa_signals: List[str] = None       # VSA专业信号 (新增)
+    vsa_signals: Optional[List[str]] = None       # VSA专业信号 (新增)
     timeframe_consistency: Optional[str] = None  # 时间框架一致性 (新增)
-    perpetual_factors: List[str] = None          # 永续合约因素 (新增)
-    key_levels: List[float] = None      # 关键价位
+    perpetual_factors: Optional[List[str]] = None          # 永续合约因素 (新增)
+    key_levels: Optional[List[float]] = None      # 关键价位
 
     def __post_init__(self):
         if self.key_levels is None:
@@ -274,7 +273,7 @@ class ConsensusCalculator:
         
         # 返回得分最高的分类
         if scores and max(scores.values()) > 0:
-            return max(scores.keys(), key=scores.get)
+            return max(scores.keys(), key=lambda k: scores[k])
         
         # 如果是置信度模式，提供智能默认值
         if patterns == self.confidence_patterns:
@@ -402,7 +401,7 @@ class ConsensusCalculator:
     
     def _calculate_list_consensus(self, model_signals: Dict[str, VPASignal], dimension: str) -> float:
         """计算列表类型维度的一致性 (VSA信号、永续合约因素等)"""
-        all_values = []
+        all_values: List[str] = []
         model_count = 0
         
         for signal in model_signals.values():
@@ -440,7 +439,7 @@ class ConsensusCalculator:
         
         # 计算价位聚类的一致性
         # 这里使用简单的范围匹配：价位相差<1%认为一致
-        consensus_groups = []
+        consensus_groups: List[List[float]] = []
         tolerance = 0.01  # 1%容差
         
         for level in all_levels:
@@ -463,7 +462,7 @@ class ConsensusCalculator:
     
     def identify_disagreements(self, results: Dict[str, Any]) -> List[str]:
         """识别具体的分歧点"""
-        disagreements = []
+        disagreements: List[str] = []
         
         # 提取信号
         model_signals = {}
@@ -488,7 +487,7 @@ class ConsensusCalculator:
             
             if len(set(values)) > 1:  # 存在分歧
                 disagreement_desc = f"{dimension}分歧: "
-                value_groups = {}
+                value_groups: Dict[str, List[str]] = {}
                 for model, value in model_values.items():
                     if value not in value_groups:
                         value_groups[value] = []
@@ -529,9 +528,10 @@ class ConsensusCalculator:
                 }
         
         # 汇总关键价位
-        all_levels = []
+        all_levels: List[float] = []
         for signal in model_signals.values():
-            all_levels.extend(signal.key_levels)
+            if signal.key_levels is not None:
+                all_levels.extend(signal.key_levels)
         
         # 聚类价位
         if all_levels:
@@ -553,7 +553,7 @@ class ConsensusCalculator:
             return []
         
         sorted_levels = sorted(levels)
-        clusters = []
+        clusters: List[Dict[str, Any]] = []
         
         for level in sorted_levels:
             matched = False

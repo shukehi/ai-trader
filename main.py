@@ -4,11 +4,12 @@ ETH永续合约量价分析助手
 使用OpenRouter API调用多种LLM模型分析原始K线数据
 """
 
-import asyncio
+# import asyncio  # 未使用
 import argparse
 from config import Settings
 from data import BinanceFetcher
 from formatters import DataFormatter
+from formatters.executive_formatter import ExecutiveFormatter
 from ai import OpenRouterClient
 import logging
 
@@ -245,30 +246,25 @@ def run_single_analysis(args, analysis_mode):
             # 传统单模型分析 - 支持多种模式
             
             # 格式化数据（根据分析模式选择格式）
+            executive_formatter = ExecutiveFormatter()
             if analysis_mode['name'] == '交易信号模式':
-                data = formatter.format_trading_signal_data(df)
+                data = executive_formatter.format_trading_signal_data(df)
                 custom_prompt = analysis_mode['prompt']
             elif analysis_mode['name'] == '快速信号模式':
-                data = formatter.format_quick_signal_data(df)
+                data = executive_formatter.format_quick_signal_data(df)
                 custom_prompt = analysis_mode['prompt']
             elif analysis_mode['name'] == '执行摘要模式':
-                data = formatter.format_executive_summary_data(df)
+                data = executive_formatter.format_executive_summary_data(df)
                 custom_prompt = analysis_mode['prompt']
             else:
-                # 使用标准Pattern格式
-                data = formatter.to_pattern_description(df)
+                # 使用标准Pattern格式  
+                data = DataFormatter.to_pattern_description(df)
                 custom_prompt = None
             
             # Token估算
-            if hasattr(formatter, 'estimate_tokens_by_format'):
-                if analysis_mode['name'] in ['交易信号模式', '快速信号模式', '执行摘要模式']:
-                    format_type = analysis_mode['name'].replace('模式', '').lower()
-                    token_info = formatter.estimate_tokens_by_format(df, format_type)
-                    print(f"📝 数据格式化完成，预估tokens: {token_info['tokens']}")
-                    print(f"💰 成本预估: {token_info['description']} (节省{int((1-token_info['cost_factor'])*100)}%)")
-                else:
-                    token_estimate = formatter.estimate_tokens_by_format(df)
-                    print(f"📝 数据格式化完成，预估tokens: {token_estimate['pattern']}")
+            if hasattr(DataFormatter, 'estimate_tokens_by_format'):
+                token_estimate = DataFormatter.estimate_tokens_by_format(df)
+                print(f"📝 数据格式化完成，预估tokens: {token_estimate.get('pattern', '未知')}")
             
             # AI分析
             print(f"🤖 使用 {model_to_use} 进行{analysis_mode['name']}分析...")
@@ -427,7 +423,7 @@ def run_validation_check(args):
         )
         
         # 格式化数据
-        data = formatter.to_pattern_description(df)
+        data = DataFormatter.to_pattern_description(df)
         
         # 执行快速验证
         result = engine.quick_validation_check(data, 'vpa')
@@ -555,8 +551,7 @@ def run_trading_mode(args, analysis_mode):
                         continue
                 else:
                     # 单模型分析
-                    formatter = DataFormatter()
-                    data = formatter.to_pattern_description(df)
+                    data = DataFormatter.to_pattern_description(df)
                     
                     client = OpenRouterClient()
                     result = client.analyze_market_data(

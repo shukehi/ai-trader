@@ -116,9 +116,8 @@ class VSACalculator:
         """
         分类价差类型 (Wide/Narrow/Normal)
         """
-        spread_percentiles = df['spread'].rolling(window=50).quantile([0.3, 0.7])
-        spread_low = spread_percentiles.iloc[:, 0]
-        spread_high = spread_percentiles.iloc[:, 1]
+        spread_low = df['spread'].rolling(window=50).quantile(0.3)
+        spread_high = df['spread'].rolling(window=50).quantile(0.7)
         
         spread_types = []
         for i, spread in enumerate(df['spread']):

@@ -9,7 +9,7 @@ import time
 import threading
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple, Any, Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 import logging
 
@@ -49,7 +49,7 @@ class TradingSignal:
     reasoning: str = ""
     ai_decision_id: Optional[str] = None
     market_phase: str = "unknown"  # VSA market phase
-    vsa_signals: List[str] = None  # VSA signals detected
+    vsa_signals: List[str] = field(default_factory=list)  # VSA signals detected
     risk_reward_ratio: Optional[float] = None
     suggested_position_size: Optional[float] = None
     
@@ -215,7 +215,9 @@ class SignalExtractor:
                 scores[direction] += matches
         
         # 返回得分最高的方向
-        max_direction = max(scores, key=scores.get)
+        if not scores:
+            return "neutral"
+        max_direction = max(scores.keys(), key=lambda k: scores[k])
         if scores[max_direction] == 0:
             return "neutral"
         
@@ -684,7 +686,11 @@ class SignalExecutor:
                 symbol=signal.symbol,
                 side=signal.direction,
                 quantity=quantity,
-                entry_price=signal.entry_price or self.exchange.get_current_price(signal.symbol),
+                entry_price=(
+                    signal.entry_price 
+                    if signal.entry_price is not None 
+                    else self.exchange.get_current_price(signal.symbol) or 0.0
+                ),
                 strategy=f"ai_{signal.ai_decision_id}" if signal.ai_decision_id else "ai_signal",
                 ai_decision_id=signal.ai_decision_id
             )
