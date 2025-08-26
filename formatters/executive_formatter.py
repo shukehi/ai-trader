@@ -8,13 +8,12 @@ import json
 import pandas as pd
 from datetime import datetime
 from typing import Dict, List, Optional
-from utils.price_action_calculator import PriceActionCalculator
 
 class ExecutiveFormatter:
-    """执行摘要格式化器"""
+    """执行摘要格式化器 - 简化版AI直接分析格式"""
     
     def __init__(self):
-        self.price_calculator = PriceActionCalculator()
+        pass  # 简化，不再依赖传统计算器
     
     def format_trading_signal_data(self, df: pd.DataFrame, vsa_analysis: Optional[Dict] = None, 
                                    funding_rate: Optional[float] = None, open_interest: Optional[float] = None) -> str:
@@ -27,8 +26,8 @@ class ExecutiveFormatter:
         volume_avg = df['volume'].tail(20).mean()
         volume_ratio = df['volume'].iloc[-1] / volume_avg
         
-        # 计算支撑阻力位
-        sr_levels = self.price_calculator.calculate_support_resistance(df)
+        # 简单支撑阻力位计算 (替代传统方法)
+        sr_levels = self._simple_support_resistance(df)
         
         # 格式化核心数据
         output = f"""## 📊 ETH/USDT 永续合约数据 (最新50根K线)
@@ -258,4 +257,27 @@ class CostOptimizer:
             'daily_cost': f'${daily_cost:.2f}',
             'monthly_cost': f'${monthly_cost:.2f}',
             'tier': model_tier
+        }
+    
+    def _simple_support_resistance(self, df: pd.DataFrame) -> Dict:
+        """
+        简单的支撑阻力位计算 (替代传统复杂方法)
+        基于近期高低点的简单识别
+        """
+        # 获取最近20根K线的高低点
+        recent_data = df.tail(20)
+        
+        # 简单阻力位：近期最高点
+        resistances = [
+            {'price': recent_data['high'].max(), 'strength': 'strong'}
+        ]
+        
+        # 简单支撑位：近期最低点  
+        supports = [
+            {'price': recent_data['low'].min(), 'strength': 'strong'}
+        ]
+        
+        return {
+            'resistances': resistances,
+            'supports': supports
         }
