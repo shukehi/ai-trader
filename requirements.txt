@@ -1,43 +1,22 @@
-# AI交易系统完整依赖列表
-# 建议使用分层安装：
-# 1. pip install -r requirements-core.txt     (必需依赖)
-# 2. pip install -r requirements-optional.txt (可选依赖)
+# AI直接分析交易系统核心依赖
+# 专注API数据获取和AI分析原始K线数据
 
-# === 核心依赖 (必需) ===
-# AI模型和API通信
+# AI模型API通信
 openai>=1.0.0
 python-dotenv>=1.0.0
 requests>=2.31.0
 
-# 数据处理核心
+# 数据处理
 pandas>=2.0.0
 numpy>=1.24.0
 
-# 加密货币交易所连接
+# 加密货币交易所数据
 ccxt>=4.0.0
-python-binance>=1.0.17
 
-# 实时通信
+# 实时WebSocket连接
 websockets>=11.0.0
 aiohttp>=3.8.0
 
-# 基础工具
+# 时间处理
 python-dateutil>=2.8.0
 pytz>=2023.3
-
-# === 可选依赖 (增强功能) ===
-# AI直接分析原始数据 - 无需传统技术指标预处理
-
-# 数据可视化
-matplotlib>=3.7.0
-plotly>=5.15.0
-
-# 开发和测试工具
-jupyter>=1.0.0
-ipykernel>=6.0.0
-
-# 数据库支持
-sqlalchemy>=2.0.0
-
-# 性能分析
-psutil>=5.9.0

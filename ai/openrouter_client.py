@@ -243,62 +243,6 @@ class OpenRouterClient:
         """获取可用的模型列表"""
         return self.models.copy()
     
-    def estimate_cost(self, model_name: str, prompt_tokens: int, completion_tokens: int) -> Dict[str, Any]:
-        """
-        估算调用成本 (2025年OpenRouter价格，per 1K tokens)
-        """
-        # OpenRouter 2025 Latest Pricing (USD per 1K tokens)
-        pricing = {
-            # 🔥 2025 Latest Flagship Models (2025年8月最新价格)
-            'gpt5-chat': {'input': 1.25, 'output': 10.0},     # GPT-5 Chat (旗舰版)
-            'gpt5-mini': {'input': 0.25, 'output': 2.0},      # GPT-5 Mini (推理版)
-            'gpt5-nano': {'input': 0.05, 'output': 0.4},      # GPT-5 Nano (轻量版)
-            'claude-opus-41': {'input': 0.075, 'output': 0.375}, # Claude Opus 4.1 (Ultra Premium)
-            'gemini-25-pro': {'input': 0.04, 'output': 0.12},  # Gemini 2.5 Pro (Premium)
-            'grok4': {'input': 0.03, 'output': 0.09},          # Grok 4 (High-end)
-            
-            # OpenAI Models
-            'gpt4': {'input': 0.01, 'output': 0.03},           # GPT-4 Turbo
-            'gpt4o': {'input': 0.0025, 'output': 0.01},        # GPT-4o
-            'gpt4o-mini': {'input': 0.00015, 'output': 0.0006}, # GPT-4o mini
-            'o1': {'input': 0.015, 'output': 0.06},            # o1 reasoning
-            'o1-mini': {'input': 0.003, 'output': 0.012},      # o1 mini
-            
-            # Anthropic Claude Models
-            'claude': {'input': 0.003, 'output': 0.015},       # Claude 3.5 Sonnet
-            'claude-haiku': {'input': 0.00025, 'output': 0.00125}, # Claude 3.5 Haiku
-            'claude-opus': {'input': 0.015, 'output': 0.075},  # Claude 3 Opus
-            
-            # Google Gemini Models
-            'gemini': {'input': 0.00125, 'output': 0.005},     # Gemini Pro 1.5
-            'gemini-flash': {'input': 0.000075, 'output': 0.0003}, # Gemini Flash 1.5
-            'gemini-2': {'input': 0.0001, 'output': 0.0004},   # Gemini 2.0 Flash
-            
-            # xAI Grok Models
-            'grok': {'input': 0.005, 'output': 0.015},         # Grok Beta
-            'grok-vision': {'input': 0.005, 'output': 0.015},  # Grok Vision
-            
-            # Meta Llama Models (高性价比)
-            'llama': {'input': 0.0004, 'output': 0.0004},      # Llama 3.1 70B
-            'llama-405b': {'input': 0.003, 'output': 0.003}    # Llama 3.1 405B
-        }
-        
-        if model_name not in pricing:
-            return {'estimated_cost': 0, 'currency': 'USD', 'note': 'Unknown model pricing'}
-        
-        rates = pricing[model_name]
-        input_cost = (prompt_tokens / 1000) * rates['input']
-        output_cost = (completion_tokens / 1000) * rates['output']
-        total_cost = input_cost + output_cost
-        
-        return {
-            'estimated_cost': round(total_cost, 6),
-            'input_cost': round(input_cost, 6),
-            'output_cost': round(output_cost, 6),
-            'currency': 'USD',
-            'model': model_name,
-            'rates': rates
-        }
     
     def generate_response(self, prompt: str, model_name: str = 'gpt4o-mini') -> Dict[str, Any]:
         """

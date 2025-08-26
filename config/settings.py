@@ -71,10 +71,9 @@ class Settings:
         'max_models_per_validation': 5,  # 单次验证最大模型数
         'timeout_seconds': 120,          # 验证超时时间
         
-        # 成本控制
-        'enable_cost_optimization': True, # 启用成本优化
-        'max_cost_per_validation': 0.10, # 单次验证最大成本($)
-        'fast_mode_cost_limit': 0.05,   # 快速模式成本限制($)
+        # 性能控制
+        'enable_optimization': True,     # 启用性能优化
+        'timeout_per_request': 60,       # 单个请求超时时间(秒)
         
         # 质量控制
         'minimum_models_for_consensus': 2, # 最少模型数量
@@ -215,79 +214,33 @@ class Settings:
             'large_context': ['gemini-25-pro', 'claude-opus-41', 'gemini'],
         }
     
-    # Model recommendations for different tasks
+    # Model recommendations for different analysis types
     RECOMMENDED_MODELS = {
-        'vpa': ['gpt5-mini', 'claude-opus-41', 'gemini-25-pro'],
-        'quick': ['gemini-flash', 'gpt5-nano', 'claude-haiku'],
-        'economy': ['gpt5-nano', 'claude-haiku', 'gemini-flash'],
-        'research': ['gpt5-chat', 'claude-opus-41', 'o1'],
-        'trading_signal': ['gpt5-mini', 'gpt4o-mini', 'gemini-flash'],  # 新增：交易信号模式
-        'ultra_economy': ['gpt5-nano', 'gemini-flash']  # 新增：超经济模式
+        'simple': ['gemini-flash', 'gpt5-nano', 'gpt4o-mini'],
+        'complete': ['gpt4o-mini', 'claude', 'gemini'],
+        'enhanced': ['gpt5-mini', 'claude-opus-41', 'gpt5-chat']
     }
     
-    # 成本控制配置
-    COST_CONTROL = {
-        'daily_budget': 10.0,  # 降低默认日预算
-        'signal_budget': 2.0,   # 单次信号成本限制
-        'economy_threshold': 0.005,  # 经济模式成本阈值
-        'warning_threshold': 8.0  # 日预算警告阈值
-    }
-    
-    # 交易模式配置
-    TRADING_MODES = {
-        'signal': {
-            'default_model': 'gpt5-mini',
-            'fallback_model': 'gpt4o-mini',
-            'max_cost': 0.05,
-            'timeout': 45
-        },
-        'quick': {
+    # 分析模式配置
+    ANALYSIS_MODES = {
+        'simple': {
             'default_model': 'gemini-flash',
-            'fallback_model': 'gpt5-nano', 
-            'max_cost': 0.01,
+            'fallback_model': 'gpt4o-mini',
             'timeout': 20
         },
-        'research': {
-            'default_model': 'gpt5-mini',
+        'complete': {
+            'default_model': 'gpt4o-mini',
             'fallback_model': 'claude',
-            'max_cost': 0.2,
+            'timeout': 45
+        },
+        'enhanced': {
+            'default_model': 'gpt5-mini',
+            'fallback_model': 'claude-opus-41',
             'timeout': 90
         }
     }
 
     @classmethod
-    def get_recommended_models_for_task(cls, task_type: str = 'vpa'):
-        """根据任务类型获取推荐模型"""
-        if task_type == 'vpa':
-            return {
-                'primary': ['gpt5-mini', 'claude-opus-41'],  # 基于Phase2测试结果
-                'validation': ['gpt4o-mini', 'gemini-flash'],
-                'arbitrator': 'claude-haiku'
-            }
-        elif task_type == 'trading_signal':
-            return {
-                'primary': ['gpt5-mini'],
-                'validation': ['gpt4o-mini'],
-                'arbitrator': 'gemini-flash'
-            }
-        elif task_type == 'ultra_economy':
-            return {
-                'primary': ['gemini-flash'],
-                'validation': ['gpt5-nano'],
-                'arbitrator': 'claude-haiku'
-            }
-        elif task_type == 'technical':
-            return {
-                'primary': ['gpt4o', 'claude'],
-                'validation': ['gpt4o-mini', 'gemini'],
-                'arbitrator': 'claude-haiku'
-            }
-        elif task_type == 'pattern':
-            return {
-                'primary': ['gemini-flash', 'gpt4o-mini'],
-                'validation': ['claude-haiku'],
-                'arbitrator': 'gpt5-mini'
-            }
-        else:
-            # 默认通用配置
-            return cls.VALIDATION_CONFIG
+    def get_recommended_models_for_task(cls, analysis_type: str = 'simple'):
+        """根据分析类型获取推荐模型"""
+        return cls.RECOMMENDED_MODELS.get(analysis_type, cls.RECOMMENDED_MODELS['simple'])

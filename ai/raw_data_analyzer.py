@@ -81,9 +81,8 @@ class RawDataAnalyzer:
             # 提取分析文本
             analysis_result = api_result.get('analysis', '')
             
-            # 计算成本和时间
+            # 计算时间和质量
             analysis_time = time.time() - start_time
-            estimated_cost = self._estimate_cost(formatted_data, model)
             
             # 评估分析质量 (基于验证成功的评估体系)
             quality_score = self._evaluate_analysis_quality(analysis_result, df)
@@ -94,9 +93,7 @@ class RawDataAnalyzer:
                 'quality_score': quality_score,
                 'performance_metrics': {
                     'analysis_time': round(analysis_time, 2),
-                    'estimated_cost': estimated_cost,
-                    'data_points': len(df),
-                    'tokens_used': len(formatted_data) // 4  # 粗略估算
+                    'data_points': len(df)
                 },
                 'model_info': {
                     'model_used': model,
@@ -114,7 +111,7 @@ class RawDataAnalyzer:
                 'success': True
             }
             
-            logger.info(f"✅ AI分析完成 - 质量: {quality_score}/100, 耗时: {analysis_time:.2f}s, 成本: ${estimated_cost:.6f}")
+            logger.info(f"✅ AI分析完成 - 质量: {quality_score}/100, 耗时: {analysis_time:.2f}s")
             return result
             
         except Exception as e:
@@ -143,7 +140,6 @@ class RawDataAnalyzer:
         批量多模型分析 (基于enhanced测试套件)
         """
         results = {}
-        total_cost = 0.0
         successful_analyses = 0
         
         logger.info(f"🔄 开始批量分析 - {len(models)}个模型")
@@ -153,7 +149,6 @@ class RawDataAnalyzer:
                 result = self.analyze_raw_ohlcv_sync(df, model, analysis_type)
                 if result.get('success', False):
                     results[model] = result
-                    total_cost += result.get('performance_metrics', {}).get('estimated_cost', 0)
                     successful_analyses += 1
                 else:
                     results[model] = {'error': result.get('error', 'Unknown error')}
@@ -169,15 +164,13 @@ class RawDataAnalyzer:
                 'total_models': len(models),
                 'successful_analyses': successful_analyses,
                 'success_rate': round((successful_analyses / len(models)) * 100, 1),
-                'total_cost': round(total_cost, 6),
                 'fastest_model': self._find_fastest_model(results),
-                'cheapest_model': self._find_cheapest_model(results),
                 'highest_quality': self._find_highest_quality_model(results)
             },
             'recommendation': self._generate_batch_recommendation(results)
         }
         
-        logger.info(f"✅ 批量分析完成 - 成功率: {summary['summary']['success_rate']}%, 总成本: ${summary['summary']['total_cost']}")
+        logger.info(f"✅ 批量分析完成 - 成功率: {summary['summary']['success_rate']}%")
         return summary
     
     def _build_analysis_prompt(self, analysis_type: str) -> str:
@@ -247,20 +240,6 @@ class RawDataAnalyzer:
         
         return score
     
-    def _estimate_cost(self, formatted_data: str, model: str) -> float:
-        """估算API成本"""
-        token_count = len(formatted_data) // 4  # 粗略估算
-        
-        # 基于实际测试的成本数据
-        cost_per_1k_tokens = {
-            'gemini-flash': 0.000001,  # 极低成本
-            'gpt4o-mini': 0.00015,
-            'gpt5-mini': 0.00025,
-            'claude-haiku': 0.00025
-        }
-        
-        rate = cost_per_1k_tokens.get(model, 0.001)
-        return (token_count / 1000) * rate
     
     def _find_fastest_model(self, results: Dict) -> str:
         """找出最快的模型"""
@@ -276,19 +255,6 @@ class RawDataAnalyzer:
         
         return fastest_model or 'unknown'
     
-    def _find_cheapest_model(self, results: Dict) -> str:
-        """找出成本最低的模型"""
-        cheapest_model = None
-        lowest_cost = float('inf')
-        
-        for model, result in results.items():
-            if result.get('success') and 'performance_metrics' in result:
-                cost = result['performance_metrics'].get('estimated_cost', float('inf'))
-                if cost < lowest_cost:
-                    lowest_cost = cost
-                    cheapest_model = model
-        
-        return cheapest_model or 'unknown'
     
     def _find_highest_quality_model(self, results: Dict) -> str:
         """找出质量最高的模型"""
