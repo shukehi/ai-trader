@@ -13,6 +13,7 @@ from datetime import datetime
 
 from .openrouter_client import OpenRouterClient
 from formatters import DataFormatter
+from prompts import PromptManager
 
 logger = logging.getLogger(__name__)
 
@@ -34,12 +35,14 @@ class RawDataAnalyzer:
         """初始化原始数据分析器"""
         self.client = OpenRouterClient(api_key)
         self.formatter = DataFormatter()
+        self.prompt_manager = PromptManager()
         logger.info("✅ 原始数据AI分析器初始化完成")
     
     def analyze_raw_ohlcv(self, 
                          df: pd.DataFrame,
                          model: str = 'gemini-flash',
-                         analysis_type: str = 'simple') -> Dict[str, Any]:
+                         analysis_type: str = 'simple',
+                         analysis_method: Optional[str] = None) -> Dict[str, Any]:
         """
         AI直接分析原始OHLCV数据
         
@@ -47,6 +50,7 @@ class RawDataAnalyzer:
             df: 原始OHLCV数据DataFrame  
             model: AI模型 ('gemini-flash', 'gpt4o-mini', 'gpt5-mini', etc.)
             analysis_type: 分析类型 ('simple', 'complete', 'enhanced')
+            analysis_method: 分析方法 ('vpa-classic', 'ict-liquidity', 'pa-trend', etc.)
             
         Returns:
             分析结果字典
@@ -54,7 +58,8 @@ class RawDataAnalyzer:
         start_time = time.time()
         
         try:
-            logger.info(f"🚀 开始AI直接分析 - 模型: {model}, 类型: {analysis_type}")
+            method_display = f", 方法: {analysis_method}" if analysis_method else ""
+            logger.info(f"🚀 开始AI直接分析 - 模型: {model}, 类型: {analysis_type}{method_display}")
             
             # 数据验证
             if df is None or len(df) == 0:
@@ -63,16 +68,39 @@ class RawDataAnalyzer:
             # 格式化原始数据 (使用最优的CSV格式)
             formatted_data = self.formatter.to_csv_format(df, include_volume=True)
             
-            # 构建分析提示词 (基于验证成功的测试模式)
-            prompt = self._build_analysis_prompt(analysis_type)
+            # 构建分析提示词
+            if analysis_method:
+                # 使用指定的分析方法
+                try:
+                    method_info = self.prompt_manager.get_method_info(analysis_method)
+                    prompt = self.prompt_manager.load_prompt(method_info['category'], method_info['method'])
+                    # 在提示词前添加数据
+                    prompt = f"{prompt}\n\n## 数据\n\n{formatted_data}"
+                    api_analysis_type = f"{method_info['category']}_analysis"
+                except Exception as e:
+                    logger.warning(f"⚠️ 无法加载分析方法 {analysis_method}: {e}, 使用默认方法")
+                    prompt = self._build_analysis_prompt(analysis_type)
+                    api_analysis_type = 'raw_vpa'
+            else:
+                # 使用传统的分析类型
+                prompt = self._build_analysis_prompt(analysis_type) 
+                api_analysis_type = 'raw_vpa'
             
             # AI分析 - 直接理解原始数据  
-            api_result = self.client.analyze_market_data(
-                data=formatted_data,
-                model_name=model,
-                analysis_type='raw_vpa',
-                custom_prompt=prompt
-            )
+            if analysis_method:
+                # 使用新的提示词管理系统
+                api_result = self.client.generate_response(
+                    prompt=prompt,
+                    model_name=model
+                )
+            else:
+                # 使用传统方法
+                api_result = self.client.analyze_market_data(
+                    data=formatted_data,
+                    model_name=model,
+                    analysis_type=api_analysis_type,
+                    custom_prompt=prompt
+                )
             
             # 检查API调用是否成功
             if not api_result.get('success'):
@@ -85,7 +113,15 @@ class RawDataAnalyzer:
             analysis_time = time.time() - start_time
             
             # 评估分析质量 (基于验证成功的评估体系)
-            quality_score = self._evaluate_analysis_quality(analysis_result, df)
+            if analysis_method:
+                try:
+                    evaluator = self.prompt_manager.get_quality_evaluator(analysis_method)
+                    quality_score = evaluator(analysis_result, df)
+                except Exception as e:
+                    logger.warning(f"⚠️ 无法使用专用评估器 {analysis_method}: {e}, 使用默认评估器")
+                    quality_score = self._evaluate_analysis_quality(analysis_result, df)
+            else:
+                quality_score = self._evaluate_analysis_quality(analysis_result, df)
             
             # 构建结果
             result = {

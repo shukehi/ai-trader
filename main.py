@@ -10,6 +10,7 @@ from config import Settings
 from data import BinanceFetcher
 from formatters import DataFormatter
 from ai import RawDataAnalyzer, OpenRouterClient, AnalysisEngine
+from prompts import PromptManager
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -29,7 +30,27 @@ def main():
     parser.add_argument('--analysis-type', choices=['simple', 'complete', 'enhanced'], 
                        default='simple', help='AI分析类型')
     
+    # 新增: 分析方法选择
+    parser.add_argument('--analysis-method', help='分析方法 (如: vpa-classic, ict-liquidity, pa-trend等)')
+    parser.add_argument('--list-methods', action='store_true', help='列出所有可用的分析方法')
+    
     args = parser.parse_args()
+    
+    # 处理列出方法请求
+    if args.list_methods:
+        prompt_manager = PromptManager()
+        methods = prompt_manager.list_available_methods()
+        
+        print("📚 可用的分析方法:")
+        for category, method_list in methods.items():
+            print(f"\n🔸 {category}:")
+            for method in method_list:
+                try:
+                    method_info = prompt_manager.get_method_info(f"{category.replace('_', '-')}-{method.replace('_', '-')}")
+                    print(f"  • {method_info['display_name']} (--analysis-method {category.replace('_', '-')}-{method.replace('_', '-')})")
+                except:
+                    print(f"  • {method} (--analysis-method {category.replace('_', '-')}-{method.replace('_', '-')})")
+        return 0
     
     try:
         # 验证配置
@@ -38,6 +59,8 @@ def main():
         print(f"🚀 启动AI直接分析助手...")
         print(f"📊 分析参数: {args.symbol} {args.timeframe} 最近{args.limit}条数据")
         print(f"🤖 使用模型: {args.model}")
+        if args.analysis_method:
+            print(f"📋 分析方法: {args.analysis_method}")
         
         # 获取数据
         fetcher = BinanceFetcher()
@@ -66,7 +89,8 @@ def main():
             result = analyzer.analyze_raw_ohlcv(
                 df=df,
                 model=args.model,
-                analysis_type=args.analysis_type
+                analysis_type=args.analysis_type,
+                analysis_method=args.analysis_method
             )
             
             if result.get('success'):
