@@ -56,12 +56,28 @@ class OpenRouterClient:
             
             # 估算token数量
             estimated_tokens = len(data.split()) + len(system_prompt.split())
-            max_tokens = self.token_limits.get(model_name, 32000)
+            max_model_tokens = self.token_limits.get(model_name, 32000)
             
-            if estimated_tokens > max_tokens * 0.8:  # 预留20%空间用于响应
-                logger.warning(f"数据量可能超出模型限制 ({estimated_tokens} > {max_tokens * 0.8})")
+            # 根据分析类型动态分配响应空间比例
+            response_ratios = {
+                'general': 0.3,
+                'vpa': 0.5,
+                'technical': 0.4,
+                'pattern': 0.4,
+                'perpetual_vpa': 0.6,  # VPA分析需要更多空间
+                'raw_vpa': 0.5
+            }
+            response_ratio = response_ratios.get(analysis_type, 0.4)
             
-            logger.info(f"使用模型 {model_id} 分析数据，预估token数: {estimated_tokens}")
+            # 计算可用的响应token数
+            available_response_tokens = int((max_model_tokens - estimated_tokens) * response_ratio)
+            # 确保至少有1000个token用于响应，但不超过模型剩余容量
+            max_response_tokens = max(1000, min(available_response_tokens, max_model_tokens - estimated_tokens - 500))
+            
+            if estimated_tokens > max_model_tokens * 0.7:  # 调整为70%预警阈值
+                logger.warning(f"输入token较多 ({estimated_tokens} > {max_model_tokens * 0.7})，响应空间: {max_response_tokens}")
+            
+            logger.info(f"使用模型 {model_id} 分析数据，输入token: {estimated_tokens}, 最大响应token: {max_response_tokens}")
             
             start_time = time.time()
             
@@ -72,7 +88,7 @@ class OpenRouterClient:
                     {"role": "user", "content": data}
                 ],
                 temperature=0.1,  # 低温度确保一致性
-                max_tokens=min(4000, max_tokens - estimated_tokens),  # 预留响应空间
+                max_tokens=max_response_tokens,  # 动态分配响应空间
             )
             
             end_time = time.time()
@@ -103,17 +119,6 @@ class OpenRouterClient:
                 'analysis': None
             }
     
-    def batch_analyze(self, data: str, models: List[str], analysis_type: str = 'general') -> Dict[str, Dict[str, Any]]:
-        """
-        批量分析，使用多个模型分析同一数据
-        """
-        results = {}
-        for model in models:
-            logger.info(f"使用 {model} 模型分析...")
-            results[model] = self.analyze_market_data(data, model, analysis_type)
-            time.sleep(1)  # 避免频率限制
-        
-        return results
     
     def _get_system_prompt(self, analysis_type: str) -> str:
         """获取不同类型分析的系统提示词"""
@@ -262,12 +267,16 @@ class OpenRouterClient:
             
             # 估算token数量
             estimated_tokens = len(prompt.split())
-            max_tokens = self.token_limits.get(model_name, 32000)
+            max_model_tokens = self.token_limits.get(model_name, 32000)
             
-            if estimated_tokens > max_tokens * 0.8:  # 预留20%空间用于响应
-                logger.warning(f"提示文本可能超出模型限制 ({estimated_tokens} > {max_tokens * 0.8})")
+            # 为通用响应分配50%的剩余空间
+            available_response_tokens = int((max_model_tokens - estimated_tokens) * 0.5)
+            max_response_tokens = max(1000, min(available_response_tokens, max_model_tokens - estimated_tokens - 500))
             
-            logger.info(f"使用模型 {model_id} 生成响应，预估token数: {estimated_tokens}")
+            if estimated_tokens > max_model_tokens * 0.7:
+                logger.warning(f"输入token较多 ({estimated_tokens} > {max_model_tokens * 0.7})，响应空间: {max_response_tokens}")
+            
+            logger.info(f"使用模型 {model_id} 生成响应，输入token: {estimated_tokens}, 最大响应token: {max_response_tokens}")
             
             start_time = time.time()
             
@@ -277,7 +286,7 @@ class OpenRouterClient:
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.1,  # 低温度确保一致性
-                max_tokens=min(4000, max_tokens - estimated_tokens),  # 预留响应空间
+                max_tokens=max_response_tokens,  # 动态分配响应空间
             )
             
             end_time = time.time()

@@ -51,19 +51,26 @@ class AnalysisEngine:
             prompt = self._build_analysis_prompt(analysis_type, csv_data)
             
             # 调用AI模型
-            response = self.client.complete_sync(
+            response = self.client.generate_response(
                 prompt=prompt,
-                model=model,
-                max_tokens=2000 if analysis_type == 'enhanced' else 1500
+                model_name=model
             )
             
-            return {
-                'analysis': response.get('content', ''),
-                'model': model,
-                'analysis_type': analysis_type,
-                'data_points': len(df),
-                'success': True
-            }
+            if response.get('success'):
+                return {
+                    'analysis': response.get('analysis', ''),
+                    'model': model,
+                    'analysis_type': analysis_type,
+                    'data_points': len(df),
+                    'success': True
+                }
+            else:
+                return {
+                    'analysis': f'分析失败: {response.get("error", "未知错误")}',
+                    'model': model,
+                    'analysis_type': analysis_type,
+                    'success': False
+                }
             
         except Exception as e:
             logger.error(f"AI分析失败: {str(e)}")

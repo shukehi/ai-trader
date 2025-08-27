@@ -28,7 +28,6 @@ def main():
     parser.add_argument('--raw-analysis', action='store_true', help='AI直接分析原始数据（推荐）')
     parser.add_argument('--analysis-type', choices=['simple', 'complete', 'enhanced'], 
                        default='simple', help='AI分析类型')
-    parser.add_argument('--batch-models', action='store_true', help='使用多个模型进行对比')
     
     args = parser.parse_args()
     
@@ -63,37 +62,21 @@ def main():
             print("🤖 开始AI直接分析...")
             analyzer = RawDataAnalyzer()
             
-            if args.batch_models:
-                # 多模型对比
-                models = ['gemini-flash', 'gpt4o-mini', 'claude']
-                print(f"🔄 使用多模型对比: {', '.join(models)}")
-                
-                for model in models:
-                    print(f"\n--- 📊 {model} 分析结果 ---")
-                    result = analyzer.analyze_raw_ohlcv(
-                        df=df,
-                        model=model,
-                        analysis_type=args.analysis_type
-                    )
-                    
-                    if result.get('success'):
-                        print(result['analysis'])
-                    else:
-                        print(f"❌ 分析失败: {result.get('analysis', '未知错误')}")
+            # 单模型分析
+            result = analyzer.analyze_raw_ohlcv(
+                df=df,
+                model=args.model,
+                analysis_type=args.analysis_type
+            )
+            
+            if result.get('success'):
+                print("\n--- 📊 AI分析结果 ---")
+                print(result['analysis_text'])
+                print(f"\n📈 数据点数: {result.get('data_points', len(df))}")
+                print(f"🎯 质量评分: {result.get('quality_score', 'N/A')}/100")
+                print(f"⏱️ 分析耗时: {result.get('performance_metrics', {}).get('analysis_time', 'N/A')}秒")
             else:
-                # 单模型分析
-                result = analyzer.analyze_raw_ohlcv(
-                    df=df,
-                    model=args.model,
-                    analysis_type=args.analysis_type
-                )
-                
-                if result.get('success'):
-                    print("\n--- 📊 AI分析结果 ---")
-                    print(result['analysis'])
-                    print(f"\n📈 数据点数: {result.get('data_points', len(df))}")
-                else:
-                    print(f"❌ AI分析失败: {result.get('analysis', '未知错误')}")
+                print(f"❌ AI分析失败: {result.get('error', '未知错误')}")
         else:
             # 使用分析引擎
             print("🤖 使用分析引擎...")

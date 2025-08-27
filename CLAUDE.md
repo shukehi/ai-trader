@@ -39,13 +39,15 @@ Binance API     RawDataAnalyzer/AnalysisEngine    Analysis Results
 # Core AI-direct analysis
 python main.py --raw-analysis --symbol ETHUSDT                    # Basic AI direct analysis
 python main.py --raw-analysis --analysis-type enhanced            # Advanced analysis
-python main.py --raw-analysis --batch-models                      # Multi-model comparison
 python main.py --raw-analysis --model gpt5-mini                   # Specific model
 
 # Different analysis depths
 python main.py --raw-analysis --analysis-type simple              # Quick analysis
 python main.py --raw-analysis --analysis-type complete            # Standard analysis
 python main.py --raw-analysis --analysis-type enhanced            # Detailed analysis
+
+# Alternative analysis path (fallback)
+python main.py --symbol ETHUSDT --analysis-type complete          # Uses AnalysisEngine instead of RawDataAnalyzer
 ```
 
 ### 🔧 **Development Environment Setup**
@@ -82,6 +84,27 @@ print(f'Latest price: ${df.iloc[-1][\"close\"]:.2f}')
 "
 ```
 
+## Token Management System
+**Critical Recent Change**: Removed hardcoded 4000 token response limits for better analysis quality.
+
+### Dynamic Token Allocation
+- **Analysis-Type Based**: Different response ratios (30%-60%) based on analysis complexity
+- **Model-Aware**: Utilizes full model capacity (e.g., Gemini-Flash 1M tokens, Claude 200K tokens)
+- **Smart Allocation**: `max_response_tokens = max(1000, min(available_response_tokens, max_model_tokens - estimated_tokens - 500))`
+- **Safety Mechanisms**: 70% input warning threshold, minimum 1000 token guarantee
+
+### Response Space by Analysis Type
+```python
+response_ratios = {
+    'general': 0.3,
+    'vpa': 0.5,
+    'technical': 0.4, 
+    'pattern': 0.4,
+    'perpetual_vpa': 0.6,  # VPA analysis needs more space
+    'raw_vpa': 0.5
+}
+```
+
 ## Architecture Deep Dive
 
 ### Core Components (Simplified Design)
@@ -89,8 +112,10 @@ print(f'Latest price: ${df.iloc[-1][\"close\"]:.2f}')
 #### 1. **RawDataAnalyzer** (`ai/raw_data_analyzer.py`)
 **Primary analysis engine** - directly processes raw OHLCV data:
 - `analyze_raw_ohlcv()`: Single model analysis with quality scoring
-- Supports all analysis types: simple, complete, enhanced
+- Supports all analysis types: simple, complete, enhanced  
 - Built-in quality scoring and performance metrics
+- **Key Change**: Batch analysis methods removed for system simplification
+- Returns structured results: `{'analysis_text', 'quality_score', 'performance_metrics', 'market_context'}`
 
 #### 2. **AnalysisEngine** (`ai/analysis_engine.py`)
 **Simplified analysis interface**:
@@ -99,10 +124,11 @@ print(f'Latest price: ${df.iloc[-1][\"close\"]:.2f}')
 - Direct integration with OpenRouterClient
 
 #### 3. **OpenRouterClient** (`ai/openrouter_client.py`)
-**Unified LLM interface** supporting 11+ models:
-- GPT-5 series, Claude models, Gemini series
-- Response processing and token management
-- Unified API for all supported models
+**Unified LLM interface** supporting 15+ models:
+- GPT-5 series, Claude models, Gemini series, Llama, Grok
+- Dynamic response token allocation based on model capacity and analysis type
+- Methods: `analyze_market_data()`, `generate_response()`
+- **Recent Update**: Removed hardcoded 4000 token limits, implements intelligent allocation
 
 #### 4. **DataFormatter** (`formatters/data_formatter.py`)
 **Token-optimized data formats**:
@@ -128,6 +154,26 @@ print(f'Latest price: ${df.iloc[-1][\"close\"]:.2f}')
 3. **RawDataAnalyzer/AnalysisEngine** → Direct AI interpretation
 4. **OpenRouterClient** → LLM model execution
 5. **Formatted Results** → Professional VPA analysis text
+
+## Important Development Patterns
+
+### Key Result Structure
+When main.py displays results, it expects these keys from RawDataAnalyzer:
+- `result['analysis_text']` - The main analysis content (NOT `result['analysis']`)
+- `result['quality_score']` - 5-dimensional quality evaluation (0-100)
+- `result['performance_metrics']['analysis_time']` - Response timing
+- `result['success']` - Boolean success indicator
+
+### Error Handling Pattern
+RawDataAnalyzer vs AnalysisEngine return different error structures:
+- RawDataAnalyzer: `{'error': str(e), 'success': False}`
+- AnalysisEngine: `{'analysis': f'分析失败: {error}', 'success': False}`
+
+### Model Selection Strategy
+Focus on single-model analysis (batch methods removed):
+- **Development/Testing**: `gemini-flash` (fast, economical)
+- **Production/Quality**: `claude`, `gpt4o-mini` 
+- **Premium Analysis**: `gpt5-mini`, `claude-opus-41`
 
 ## Development Workflow
 
@@ -189,6 +235,13 @@ python main.py --raw-analysis --analysis-type complete
 - **No complex testing frameworks** (test files removed)
 - **No trading execution system** (trading modules removed)
 - **No deployment scripts** (deployment directory removed)
+- **No batch analysis** (multi-model comparison removed for focus)
+
+### Recent System Changes (Important)
+- **Token Limits Removed**: Hardcoded 4000 token response limits eliminated
+- **Batch Analysis Removed**: `--batch-models` flag and related methods deleted
+- **Focus on Quality**: Single-model analysis optimization over multi-model comparison
+- **Dynamic Allocation**: Smart token distribution based on analysis type and model capacity
 
 ## Performance Benchmarks (Verified)
 - **Speed**: 5-7 seconds average response time

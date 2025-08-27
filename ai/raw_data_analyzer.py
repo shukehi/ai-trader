@@ -132,46 +132,6 @@ class RawDataAnalyzer:
         """
         return self.analyze_raw_ohlcv(df, model, analysis_type)
     
-    def batch_analyze(self, 
-                     df: pd.DataFrame,
-                     models: List[str] = ['gemini-flash', 'gpt4o-mini'],
-                     analysis_type: str = 'simple') -> Dict[str, Any]:
-        """
-        批量多模型分析 (基于enhanced测试套件)
-        """
-        results = {}
-        successful_analyses = 0
-        
-        logger.info(f"🔄 开始批量分析 - {len(models)}个模型")
-        
-        for model in models:
-            try:
-                result = self.analyze_raw_ohlcv_sync(df, model, analysis_type)
-                if result.get('success', False):
-                    results[model] = result
-                    successful_analyses += 1
-                else:
-                    results[model] = {'error': result.get('error', 'Unknown error')}
-                    
-            except Exception as e:
-                logger.error(f"模型 {model} 分析失败: {e}")
-                results[model] = {'error': str(e)}
-        
-        # 批量分析汇总
-        summary = {
-            'batch_results': results,
-            'summary': {
-                'total_models': len(models),
-                'successful_analyses': successful_analyses,
-                'success_rate': round((successful_analyses / len(models)) * 100, 1),
-                'fastest_model': self._find_fastest_model(results),
-                'highest_quality': self._find_highest_quality_model(results)
-            },
-            'recommendation': self._generate_batch_recommendation(results)
-        }
-        
-        logger.info(f"✅ 批量分析完成 - 成功率: {summary['summary']['success_rate']}%")
-        return summary
     
     def _build_analysis_prompt(self, analysis_type: str) -> str:
         """
@@ -241,53 +201,13 @@ class RawDataAnalyzer:
         return score
     
     
-    def _find_fastest_model(self, results: Dict) -> str:
-        """找出最快的模型"""
-        fastest_model = None
-        fastest_time = float('inf')
-        
-        for model, result in results.items():
-            if result.get('success') and 'performance_metrics' in result:
-                time_taken = result['performance_metrics'].get('analysis_time', float('inf'))
-                if time_taken < fastest_time:
-                    fastest_time = time_taken
-                    fastest_model = model
-        
-        return fastest_model or 'unknown'
-    
-    
-    def _find_highest_quality_model(self, results: Dict) -> str:
-        """找出质量最高的模型"""
-        best_model = None
-        highest_score = 0
-        
-        for model, result in results.items():
-            if result.get('success'):
-                score = result.get('quality_score', 0)
-                if score > highest_score:
-                    highest_score = score
-                    best_model = model
-        
-        return best_model or 'unknown'
-    
-    def _generate_batch_recommendation(self, results: Dict) -> str:
-        """生成批量分析建议"""
-        successful_models = [model for model, result in results.items() if result.get('success')]
-        
-        if not successful_models:
-            return "所有模型分析失败，建议检查API配置和网络连接"
-        
-        if len(successful_models) == len(results):
-            return "所有模型分析成功，建议选择gemini-flash进行日常分析（速度快+成本低）"
-        else:
-            return f"部分模型分析成功（{len(successful_models)}/{len(results)}），建议使用成功的模型进行分析"
     
     def get_supported_models(self) -> List[str]:
         """获取支持的AI模型列表"""
         return [
             'gemini-flash',     # 推荐：最快+最经济
             'gpt4o-mini',       # 平衡：质量+成本
-            'gpt5-mini',        # 高质量：97.8/100分
+            'gpt5-mini',        # 高质量
             'claude-haiku',     # 简洁分析
             'claude-opus-41',   # 最高质量
             'grok4'             # 创新分析
