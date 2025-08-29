@@ -145,6 +145,7 @@ class PromptManager:
             'price-action-support-resistance': {'category': 'price_action', 'method': 'support_resistance', 'display_name': '支撑阻力分析'},
             'price-action-trend-analysis': {'category': 'price_action', 'method': 'trend_analysis', 'display_name': '趋势分析'},
             'price-action-breakout-patterns': {'category': 'price_action', 'method': 'breakout_patterns', 'display_name': '突破形态分析'},
+            'price-action-al-brooks-analysis': {'category': 'price_action', 'method': 'al_brooks_analysis', 'display_name': 'Al Brooks价格行为分析'},
             
             # 综合分析
             'multi-timeframe': {'category': 'composite', 'method': 'multi_timeframe', 'display_name': '多时间框架分析'},
@@ -246,32 +247,36 @@ class PromptManager:
         return min(100, score)
     
     def _evaluate_pa_quality(self, analysis_text: str, df: Any) -> int:
-        """价格行为分析质量评估"""
+        """价格行为分析质量评估（增强Al Brooks支持）"""
         score = 0
         
-        # 1. 价格行为术语 (25分)
-        pa_terms = ['支撑', '阻力', 'support', 'resistance', '突破', 'breakout', '假突破', 
-                   '回撤', 'pullback', 'retracement', '形态', 'pattern', '趋势线', 'trendline']
+        # 1. Al Brooks专业术语检测 (30分)
+        al_brooks_terms = ['always in', 'pin bar', 'inside bar', 'outside bar', 'trend bar', 
+                          'follow through', 'pullback', 'two-legged', 'wedge', 'channel',
+                          'climax', 'reversal', 'breakout', 'flag', 'swing point', 'trend line']
+        brooks_term_count = sum(1 for term in al_brooks_terms if term.lower() in analysis_text.lower())
+        score += min(30, brooks_term_count * 2)
+        
+        # 2. 传统价格行为术语 (20分)
+        pa_terms = ['支撑', '阻力', 'support', 'resistance', '突破', '假突破', 
+                   '回撤', '形态', 'pattern', '趋势线', 'trendline']
         term_count = sum(1 for term in pa_terms if term.lower() in analysis_text.lower())
-        score += min(25, term_count * 3)
+        score += min(20, term_count * 2)
         
-        # 2. 关键价位识别 (25分)
+        # 3. Al Brooks结构分析 (25分)
+        structure_keywords = ['always in long', 'always in short', 'transitioning', '市场状态',
+                            'swing high', 'swing low', 'trend strength', '趋势强度']
+        if any(keyword.lower() in analysis_text.lower() for keyword in structure_keywords):
+            score += 25
+        
+        # 4. 具体交易计划 (15分)
+        plan_keywords = ['入场条件', '入场价位', '止损价位', '目标价位', '仓位建议',
+                        'entry condition', 'stop loss', 'target', 'position size']
+        plan_count = sum(1 for kw in plan_keywords if kw.lower() in analysis_text.lower())
+        score += min(15, plan_count * 3)
+        
+        # 5. 关键价位引用 (10分)
         if any(str(round(price, 2)) in analysis_text for price in df['close'].values[-5:]):
-            score += 25
-        
-        # 3. 趋势分析 (25分)
-        trend_keywords = ['上涨趋势', '下跌趋势', '震荡', '横盘', 'uptrend', 'downtrend', 'sideways']
-        if any(keyword.lower() in analysis_text.lower() for keyword in trend_keywords):
-            score += 25
-        
-        # 4. 形态识别 (15分)
-        pattern_keywords = ['三角形', 'triangle', '楔形', 'wedge', '通道', 'channel', '双顶', 'double top']
-        if any(keyword.lower() in analysis_text.lower() for keyword in pattern_keywords):
-            score += 15
-        
-        # 5. 交易计划 (10分)
-        plan_keywords = ['止损', 'stop loss', '目标', 'target', '风险收益比']
-        if any(keyword.lower() in analysis_text.lower() for keyword in plan_keywords):
             score += 10
         
         return min(100, score)

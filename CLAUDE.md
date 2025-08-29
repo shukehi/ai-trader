@@ -3,29 +3,42 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-AI-Trader - A streamlined AI-powered trading analysis system that validates modern LLM models can directly analyze raw OHLCV data for professional Volume Price Analysis (VPA). **Core breakthrough: AI directly understands raw candlestick data without traditional technical indicator preprocessing.**
+AI-Trader - An advanced AI-powered trading analysis system featuring **multi-timeframe analysis**, **real-time WebSocket integration**, and **professional trading methodologies**. Core breakthrough: AI directly understands raw candlestick data without traditional technical indicator preprocessing, now enhanced with intelligent multi-timeframe correlation and real-time analysis capabilities.
 
-**🏆 System Status**: Production-ready AI-direct analysis system (simplified architecture)
-**🎯 Current Architecture**: Pure AI Direct Analysis - focused on API data retrieval and AI analysis
+**🏆 System Status**: Production-ready AI-direct analysis system with advanced multi-timeframe architecture
+**🎯 Current Architecture**: AI Direct Analysis + Multi-Timeframe Intelligence + Real-Time WebSocket Integration
+**🚀 Latest Features**: Multi-timeframe analysis, real-time analysis engine, Al Brooks price action methodology
 
-### 🚀 **AI-Direct Analysis Architecture**
-**Complete elimination of traditional technical analysis preprocessing**:
-- **AI-Direct Analysis**: RawDataAnalyzer handles direct OHLCV interpretation
-- **Verified Quality**: 80-100/100 professional VPA analysis scores achieved
+### 🚀 **Advanced AI-Direct Analysis Architecture**
+**Revolutionary multi-timeframe system with complete elimination of traditional preprocessing**:
+- **AI-Direct Analysis**: RawDataAnalyzer handles direct OHLCV interpretation across multiple timeframes
+- **Multi-Timeframe Intelligence**: Automated scenario detection and timeframe selection
+- **Real-Time Analysis**: WebSocket-based live market analysis with adaptive frequency
+- **Professional Methodologies**: VPA, ICT concepts, Al Brooks price action analysis
+- **Verified Quality**: 80-100/100 professional analysis scores with confluence zone detection
 - **Efficiency Revolution**: Dramatic simplification vs traditional methods
-- **Architecture Simplification**: ~80% code reduction, focused AI-centric design
+- **Architecture Innovation**: ~80% code reduction while adding advanced multi-timeframe capabilities
 
-## Core Architecture: Simplified AI-Direct Data Understanding
+## Core Architecture: Advanced Multi-Timeframe AI-Direct Analysis
 
-### Streamlined Data Flow
+### Enhanced Data Flow Pipeline
 ```
-Raw OHLCV Data → AI Direct Analysis → Professional VPA Report
-     ↓                    ↓                     ↓
-Binance API     RawDataAnalyzer/AnalysisEngine    Analysis Results
-(No Preprocessing)       (Pure AI)              (Text Output)
+┌─────────────────┐    ┌─────────────────────┐    ┌──────────────────────┐
+│  Real-Time      │    │   Multi-Timeframe   │    │   Professional       │
+│  WebSocket Data │ -> │   AI Analysis       │ -> │   Trading Reports    │
+│  (Binance API)  │    │   (Parallel Process) │    │   (VPA/ICT/Al Brooks)│
+└─────────────────┘    └─────────────────────┘    └──────────────────────┘
+          ↓                        ↓                         ↓
+    Live Market Data    Scenario-Based Analysis    Confluence Zone Integration
+    Multiple Timeframes  Intelligent Timeframe     Context-Aware Decisions
+    Adaptive Frequency   Selection & Weighting     Historical Context
 ```
 
-**Key Innovation**: No intermediate calculations - AI directly comprehends market data patterns.
+**Key Innovations**: 
+- **Multi-Timeframe Correlation**: Parallel analysis across multiple timeframes with confluence detection
+- **Intelligent Scenario Detection**: Automatic selection of optimal timeframes based on market conditions
+- **Real-Time Adaptation**: Dynamic analysis frequency based on market volatility and volume
+- **No Preprocessing**: AI directly comprehends raw market patterns across all timeframes
 
 ### Multi-Model AI Support
 - **Fast Analysis**: gemini-flash (optimized for speed)
@@ -36,23 +49,38 @@ Binance API     RawDataAnalyzer/AnalysisEngine    Analysis Results
 
 ### 🎯 **AI Direct Analysis (Enhanced Typer + Rich CLI)**
 ```bash
-# Core AI analysis commands
+# Single timeframe analysis
 python main.py analyze                                            # Basic analysis with defaults
 python main.py analyze --symbol BTCUSDT --model claude           # Custom symbol and model
 python main.py analyze -s ETHUSDT -m gemini-flash -a enhanced    # Enhanced analysis (short flags)
 
+# Multi-timeframe analysis (NEW)
+python main.py multi-analyze                                     # Default multi-timeframe analysis
+python main.py multi-analyze --symbol ETHUSDT --timeframes "5m,1h,4h,1d"  # Custom timeframes
+python main.py multi-analyze --scenario swing --model claude     # Scenario-based analysis
+python main.py multi-analyze --symbol BTCUSDT --scenario trend --method volume-analysis-vpa-classic
+
+# Real-time analysis (NEW)
+python main.py realtime --symbol ETHUSDT                        # Start real-time analysis
+python main.py realtime --timeframes "5m,15m,1h" --frequency high --model gemini-flash
+python main.py realtime --symbol BTCUSDT --scenario intraday --adaptive-frequency
+
 # Analysis with specific methods
 python main.py analyze --method volume-analysis-vpa-classic      # VPA analysis
 python main.py analyze --method ict-concepts-fair-value-gaps     # ICT FVG analysis
-python main.py analyze --method price-action-trend-analysis      # Price action analysis
+python main.py analyze --method price-action-al-brooks-analysis  # Al Brooks analysis (NEW)
+
+# Scenario and method discovery (NEW)
+python main.py scenarios                                        # List available analysis scenarios
+python main.py methods                                          # List all available analysis methods
 
 # Utility commands
-python main.py methods                                           # List all available analysis methods
 python main.py config                                           # Configuration management
 python main.py demo                                             # Quick demonstration
 
 # Verbose and debugging
 python main.py analyze --verbose                                # Show detailed logs
+python main.py multi-analyze --verbose                          # Multi-timeframe verbose logs
 python main.py analyze --help                                   # Command help
 
 # See CLI_USAGE.md for comprehensive usage examples and output formatting
@@ -133,57 +161,108 @@ response_ratios = {
 **Primary analysis engine** - directly processes raw OHLCV data:
 - `analyze_raw_ohlcv()`: Single model analysis with quality scoring and external prompt support
 - Supports all analysis types: simple, complete, enhanced  
-- **NEW**: Supports `analysis_method` parameter for external prompt system
+- Supports `analysis_method` parameter for external prompt system (VPA, ICT, Al Brooks)
 - Built-in quality scoring and performance metrics (specialized evaluators per method)
-- **Key Change**: Batch analysis methods removed for system simplification
+- Multi-timeframe aware for consistency scoring across timeframes
 - Returns structured results: `{'analysis_text', 'quality_score', 'performance_metrics', 'market_context'}`
 
-#### 2. **AnalysisEngine** (`ai/analysis_engine.py`)
+#### 2. **MultiTimeframeAnalyzer** (`ai/multi_timeframe_analyzer.py`) **NEW**
+**Advanced multi-timeframe analysis engine**:
+- `analyze_multi_timeframe()`: Parallel analysis across multiple timeframes
+- **ScenarioDetector**: Intelligent market scenario identification (intraday, swing, trend, position)
+- **TimeframeSelector**: Optimal timeframe selection based on market conditions
+- **VolatilityAdaptor**: Dynamic analysis frequency based on market volatility
+- Confluence zone detection across timeframes
+- Weighted consistency scoring with timeframe-specific weights
+- Returns `MultiTimeframeResult` with comprehensive multi-timeframe insights
+
+#### 3. **AnalysisContext** (`ai/analysis_context.py`) **NEW**
+**Advanced result integration and context management**:
+- `create_multi_timeframe_context()`: Comprehensive context creation across timeframes
+- **ConfluenceAnalyzer**: Identifies key price levels where multiple timeframes converge
+- **SQLite-based history**: Persistent analysis history with context event tracking
+- Risk assessment and signal strength calculation
+- Support/resistance level integration across timeframes
+- Historical pattern matching and context-aware recommendations
+
+#### 4. **RealtimeAnalysisEngine** (`ai/realtime_analysis_engine.py`) **NEW**
+**Real-time WebSocket-based analysis system**:
+- `start_realtime_analysis()`: Continuous real-time market analysis
+- **FrequencyAdaptor**: Dynamic analysis frequency based on market conditions
+- **MarketConditionDetector**: Identifies volatile, trending, ranging, or quiet markets
+- WebSocket integration with Binance real-time data streams
+- Event-driven analysis (kline completion, volatility spikes, volume surges)
+- Rate limiting and intelligent analysis scheduling
+- Background processing with thread-safe operations
+
+#### 5. **AnalysisEngine** (`ai/analysis_engine.py`)
 **Simplified analysis interface**:
 - `raw_data_analysis()`: Core AI analysis method
 - Streamlined prompt building for different analysis types
+- Multi-timeframe prompt enhancement for context integration
 - Direct integration with OpenRouterClient
 
-#### 3. **OpenRouterClient** (`ai/openrouter_client.py`)
+#### 6. **OpenRouterClient** (`ai/openrouter_client.py`)
 **Unified LLM interface** supporting 15+ models:
 - GPT-5 series, Claude models, Gemini series, Llama, Grok
 - Dynamic response token allocation based on model capacity and analysis type
 - Methods: `analyze_market_data()`, `generate_response()`
 - **Recent Update**: Removed hardcoded 4000 token limits, implements intelligent allocation
 
-#### 4. **DataFormatter** (`formatters/data_formatter.py`)
+#### 7. **DataFormatter** (`formatters/data_formatter.py`)
 **Token-optimized data formats**:
 - `to_csv_format()`: Raw OHLCV for AI consumption (primary format)
 - Token optimization: price precision to 2 decimals, volume as integers
 - Multiple format options for different use cases
 
-#### 5. **BinanceFetcher** (`data/binance_fetcher.py`)
+#### 8. **BinanceFetcher** (`data/binance_fetcher.py`)
 **Market data retrieval**:
 - CCXT-based Binance perpetual futures API integration
 - Automatic symbol format handling (ETHUSDT ↔ ETH/USDT)
 - Rate limiting and error handling
 
-#### 6. **Settings** (`config/settings.py`)
+#### 9. **Settings** (`config/settings.py`)
 **Configuration management**:
 - OpenRouter API key management
 - Model definitions and mappings
 - Environment variable handling
 
-#### 7. **PromptManager** (`prompts/prompt_manager.py`) **NEW**
-**External prompt management system**:
+#### 10. **PromptManager** (`prompts/prompt_manager.py`) **ENHANCED**
+**Enhanced external prompt management system**:
 - Loads analysis-specific prompts from external files
-- Supports multiple analysis methodologies: VPA, ICT, Price Action
-- Method-specific quality evaluators
-- Caching and dynamic prompt loading
+- Supports multiple analysis methodologies: VPA, ICT, Al Brooks Price Action
+- Al Brooks-specific quality evaluator with specialized terminology detection
+- Method-specific quality evaluators for each methodology
+- Caching and dynamic prompt loading with hot reload capabilities
 - Available methods: `list_available_methods()`, `get_method_info()`, `load_prompt()`
+- Multi-timeframe aware prompts for context integration
 
-### Simplified Data Flow Pipeline
+### Advanced Multi-Timeframe Data Flow Pipeline
+**Single Timeframe Analysis**:
 1. **BinanceFetcher** → Raw OHLCV data from Binance API
 2. **DataFormatter** → Token-optimized CSV format for AI
-3. **PromptManager** → Load external analysis method prompts (if specified)
+3. **PromptManager** → Load external analysis method prompts (VPA/ICT/Al Brooks)
 4. **RawDataAnalyzer/AnalysisEngine** → Direct AI interpretation with method-specific prompts
 5. **OpenRouterClient** → LLM model execution
-6. **Formatted Results** → Professional analysis text (VPA/ICT/Price Action specific)
+6. **Formatted Results** → Professional analysis text
+
+**Multi-Timeframe Analysis (NEW)**:
+1. **ScenarioDetector** → Analyze market conditions and determine optimal scenario
+2. **TimeframeSelector** → Select appropriate timeframes based on scenario and market conditions
+3. **BinanceFetcher** → Parallel data retrieval for all selected timeframes
+4. **MultiTimeframeAnalyzer** → Parallel AI analysis across all timeframes
+5. **ConfluenceAnalyzer** → Identify key price levels where timeframes converge
+6. **AnalysisContext** → Integrate results, calculate consistency scores, generate warnings
+7. **MultiTimeframeResult** → Comprehensive report with weighted insights and trading recommendations
+
+**Real-Time Analysis (NEW)**:
+1. **BinanceWebSocket** → Live market data streams
+2. **MarketConditionDetector** → Real-time volatility and volume analysis
+3. **FrequencyAdaptor** → Dynamic analysis scheduling based on market conditions
+4. **RealtimeAnalysisEngine** → Event-driven analysis triggers
+5. **MultiTimeframeAnalyzer** → Real-time multi-timeframe analysis
+6. **AnalysisContext** → Historical context integration and decision support
+7. **Live Results** → Continuous professional analysis updates
 
 ## Important Development Patterns
 
@@ -240,14 +319,27 @@ df = fetcher.get_ohlcv('ETH/USDT', '1h', 10)
 print('Data shape:', df.shape)
 "
 
-# Test AI analysis with fast model (NEW Typer CLI)
+# Test single timeframe AI analysis
 python main.py analyze --model gemini-flash --limit 10
+
+# Test multi-timeframe analysis (NEW)
+python main.py multi-analyze --symbol ETHUSDT --timeframes "1h,4h" --model gemini-flash --verbose
+
+# Test Al Brooks analysis (NEW)
+python main.py analyze --method price-action-al-brooks-analysis --model claude --verbose
+
+# Test real-time analysis (NEW - run for 30 seconds)
+timeout 30 python main.py realtime --symbol ETHUSDT --model gemini-flash
+
+# Test scenario detection (NEW)
+python main.py multi-analyze --scenario intraday --symbol BTCUSDT --model gemini-flash
 
 # Full analysis with specific method
 python main.py analyze --analysis-type complete --method volume-analysis-vpa-classic
 
 # Test configuration and system status
 python main.py config
+python main.py scenarios  # List available scenarios (NEW)
 
 # Quick demonstration
 python main.py demo
@@ -277,6 +369,11 @@ python main.py demo
 - **No TUI framework** (Textual removed, replaced with Typer + Rich)
 
 ### Recent System Changes (Important)
+- **Multi-Timeframe Analysis Added**: Complete multi-timeframe analysis system with scenario detection
+- **Real-Time Engine Added**: WebSocket-based real-time analysis with adaptive frequency
+- **Al Brooks Integration**: Professional Al Brooks price action methodology implementation
+- **Confluence Analysis**: Multi-timeframe price level convergence detection
+- **Context Management**: Advanced analysis result integration with historical tracking
 - **TUI Removed**: Complex Textual-based TUI interface eliminated for simplicity
 - **Typer + Rich CLI**: Modern CLI with beautiful formatting and progress bars
 - **Token Limits Removed**: Hardcoded 4000 token response limits eliminated
@@ -284,6 +381,50 @@ python main.py demo
 - **Focus on Quality**: Single-model analysis optimization over multi-model comparison
 - **Dynamic Allocation**: Smart token distribution based on analysis type and model capacity
 - **External Prompt System**: Prompts externalized to files, supporting multiple analysis methodologies
+
+## Multi-Timeframe Analysis System (NEW)
+
+### 🎯 **Analysis Scenarios**
+The system intelligently selects optimal timeframes based on detected market scenarios:
+
+**Available Scenarios:**
+- **`intraday`**: Day trading focused (5m, 15m, 1h timeframes)
+- **`swing`**: Swing trading analysis (1h, 4h, 1d timeframes)
+- **`trend`**: Long-term trend analysis (4h, 1d, 1w timeframes)
+- **`position`**: Position sizing and risk management (1d, 1w timeframes)
+- **`quick`**: Fast market check (15m, 1h timeframes)
+
+**Scenario Detection Features:**
+- **Volatility Analysis**: ATR-based volatility measurement
+- **Volume Surge Detection**: Unusual volume activity identification
+- **Price Action Patterns**: Breakout and consolidation detection
+- **Market Condition Assessment**: Trending vs ranging market identification
+
+### 🔄 **Real-Time Analysis Engine**
+**Adaptive frequency system based on market conditions:**
+
+**Analysis Frequencies:**
+- **REALTIME**: Every completed K-line (high-frequency events)
+- **HIGH**: Every 5 minutes (volatile markets)
+- **NORMAL**: Every 15 minutes (standard conditions)
+- **LOW**: Every hour (quiet markets)
+- **MANUAL**: User-triggered analysis
+
+**Dynamic Triggers:**
+- **Volatility Spikes**: 2%+ price movement in short timeframe
+- **Volume Surges**: 3x average volume activity
+- **K-line Completion**: New data availability
+- **Manual Triggers**: User-initiated analysis
+
+**Rate Limiting**: Maximum 20 analyses per hour to prevent API abuse
+
+### 🎆 **Confluence Zone Analysis**
+**Advanced multi-timeframe correlation detection:**
+- **Support/Resistance Convergence**: Price levels significant across multiple timeframes
+- **Trend Alignment**: Directional consistency across timeframes
+- **Volume Profile Matching**: High-volume areas across different periods
+- **Pattern Confluence**: Technical patterns reinforcing across timeframes
+- **Risk Zone Identification**: Areas of potential reversal or continuation
 
 ## External Prompt Management System
 
@@ -293,15 +434,37 @@ The system now supports specialized analysis methodologies through external prom
 **Volume Analysis Methods:**
 - `volume-analysis-vpa-classic`: Classical VPA (Volume Price Analysis) based on Wyckoff theory
 - `volume-analysis-vsa-coulling`: Anna Coulling VSA (Volume Spread Analysis) methodology
+- `volume-analysis-volume-profile`: Volume profile and distribution analysis
 
 **ICT Concepts Methods:**
 - `ict-concepts-fair-value-gaps`: ICT Fair Value Gap identification and analysis
 - `ict-concepts-liquidity-zones`: ICT liquidity analysis and order flow
 - `ict-concepts-order-blocks`: ICT order block identification and mitigation
+- `ict-concepts-market-structure`: ICT market structure and BOS/CHoCH analysis
 
 **Price Action Methods:**
 - `price-action-support-resistance`: Support and resistance level analysis
 - `price-action-trend-analysis`: Trend structure analysis using Dow theory
+- `price-action-al-brooks-analysis`: Al Brooks price action methodology **(NEW)**
+- `price-action-breakout-patterns`: Breakout pattern identification
+
+**Composite Analysis Methods:**
+- `multi-timeframe`: Multi-timeframe correlation analysis **(NEW)**
+- `perpetual-specific`: Perpetual futures specialized analysis
+
+### 🎯 **Al Brooks Price Action Analysis (NEW)**
+Professional implementation of Al Brooks methodology from "Trading Price Action Trading Ranges" and "Reading Price Charts Bar by Bar":
+
+**Core Framework:**
+- **Always In Concept**: Market state identification (Always In Long/Short/Transitioning)
+- **Price Action Signals**: Pin bars, inside bars, outside bars, trend bars, follow-through patterns
+- **K-Line Combinations**: Two-legged pullbacks, wedge patterns, channel patterns, flag patterns
+- **Structure Analysis**: Trend strength assessment, swing point identification, breakout analysis
+- **Trading Plans**: Specific entry/exit conditions with Al Brooks risk management principles
+
+**Quality Evaluation**: Specialized evaluator detecting Al Brooks terminology (always in, pin bar, follow through, two-legged, etc.)
+
+**Usage**: `--method price-action-al-brooks-analysis`
 
 ### Method Discovery
 ```bash
@@ -327,44 +490,54 @@ Each analysis method has specialized quality evaluators:
 - **Efficiency**: 99%+ simplification vs traditional technical analysis
 - **Token Optimization**: Optimized CSV format reduces tokens by ~60%
 
-## File Structure (Actual)
+## File Structure (Current)
 ```
-/opt/ai-trader/
-├── ai/                    # AI Analysis Core
+ai-trader/
+├── ai/                    # AI Analysis Core (ENHANCED)
 │   ├── __init__.py        # Module exports
-│   ├── raw_data_analyzer.py    # Primary AI analyzer
-│   ├── analysis_engine.py      # Simplified analysis engine
-│   └── openrouter_client.py    # LLM API client
-├── data/                  # Market Data
+│   ├── raw_data_analyzer.py        # Primary AI analyzer
+│   ├── multi_timeframe_analyzer.py # Multi-timeframe analysis engine (NEW)
+│   ├── analysis_context.py         # Result integration & context management (NEW)
+│   ├── realtime_analysis_engine.py # Real-time WebSocket analysis system (NEW)
+│   ├── analysis_engine.py          # Simplified analysis engine
+│   └── openrouter_client.py        # LLM API client
+├── data/                  # Market Data (ENHANCED)
 │   ├── __init__.py
 │   ├── binance_fetcher.py      # Binance API integration
-│   └── binance_websocket.py    # WebSocket support
+│   └── binance_websocket.py    # WebSocket support (ENHANCED)
 ├── config/                # Configuration
 │   ├── __init__.py
 │   └── settings.py            # API keys and model config
 ├── formatters/            # Data Formatting
 │   ├── __init__.py
 │   └── data_formatter.py      # AI-optimized formats
-├── prompts/               # External Prompt System (NEW)
+├── prompts/               # External Prompt System (ENHANCED)
 │   ├── __init__.py
-│   ├── prompt_manager.py       # Prompt management and loading
+│   ├── prompt_manager.py       # Prompt management and loading (ENHANCED)
 │   ├── composite/              # Composite analysis prompts
+│   │   ├── multi_timeframe.txt     # Multi-timeframe analysis (NEW)
+│   │   └── perpetual_specific.txt  # Perpetual futures analysis
 │   ├── volume_analysis/        # VPA and VSA analysis prompts
 │   │   ├── vpa_classic.txt     # Classical VPA analysis
-│   │   └── vsa_coulling.txt    # Anna Coulling VSA methodology
+│   │   ├── vsa_coulling.txt    # Anna Coulling VSA methodology
+│   │   └── volume_profile.txt  # Volume profile analysis
 │   ├── ict_concepts/           # ICT (Inner Circle Trader) prompts
 │   │   ├── fair_value_gaps.txt      # FVG analysis
 │   │   ├── liquidity_zones.txt      # Liquidity analysis
-│   │   └── order_blocks.txt         # Order block identification
-│   └── price_action/           # Price action analysis prompts
+│   │   ├── order_blocks.txt         # Order block identification
+│   │   └── market_structure.txt     # Market structure analysis
+│   └── price_action/           # Price action analysis prompts (ENHANCED)
 │       ├── support_resistance.txt   # S&R analysis
-│       └── trend_analysis.txt       # Trend structure analysis
-├── main.py               # Enhanced CLI with Typer + Rich
+│       ├── trend_analysis.txt       # Trend structure analysis
+│       ├── breakout_patterns.txt    # Breakout analysis
+│       └── al_brooks_analysis.txt   # Al Brooks methodology (NEW)
+├── main.py               # Enhanced CLI with Typer + Rich (ENHANCED)
 ├── main_old.py           # Previous version (legacy)
 ├── requirements.txt      # Dependencies (with Typer + Rich)
 ├── CLI_USAGE.md         # Comprehensive CLI usage examples
-├── CLAUDE.md            # This file
+├── CLAUDE.md            # This file (UPDATED)
 ├── .env.example         # Environment configuration template
+├── .gitignore           # Git ignore file (UPDATED)
 └── venv/                # Python virtual environment
 ```
 
