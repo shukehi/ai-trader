@@ -11,15 +11,51 @@ import json
 
 logger = logging.getLogger(__name__)
 
+# Al Brooks术语映射系统 - 解决提示词与评估器术语不匹配问题
+BROOKS_TERM_MAPPING = {
+    # 核心Brooks概念及其同义词
+    'always_in_concepts': [
+        'always in', 'always in long', 'always in short', 'transitioning',
+        'market state', '市场状态'
+    ],
+    
+    'bar_patterns': [
+        # 提示词使用的术语 → 评估器可接受的术语
+        'reversal bar with long tail', 'pin bar', 'reversal bar',
+        'outside bar', 'engulfing bar', 
+        'inside bar', 'ii', 'ioi',
+        'trend bar', 'follow through', 'follow-through'
+    ],
+    
+    'structure_analysis': [
+        'H1', 'H2', 'L1', 'L2', 'high 1', 'high 2', 'low 1', 'low 2',
+        'first entry', 'second entry',
+        'swing point', 'swing high', 'swing low',
+        'pullback', 'two-legged', 'two-legged pullback'
+    ],
+    
+    'brooks_concepts': [
+        'breakout mode', 'tight trading range', 'TTR',
+        'measured move', 'magnet', 'micro channel',
+        'spike and channel', 'wedge', 'flag',
+        'trend strength', 'strong', 'medium', 'weak'
+    ],
+    
+    'risk_management': [
+        'stop', 'stop loss', 'target', 'entry', 'exit',
+        'structural stop', 'position size', 'risk management'
+    ]
+}
+
 class PromptManager:
     """
-    提示词管理器
+    提示词管理器 - Al Brooks验证期版本
     
-    支持多种交易分析方法：
-    - VPA (Volume Price Analysis)
-    - ICT (Inner Circle Trader) 概念  
-    - 价格行为分析
-    - 综合分析方法
+    当前支持的分析方法（验证期）：
+    - Al Brooks 价格行为分析 (专业验证中)
+    
+    注意：为确保分析质量，当前仅支持Al Brooks方法。
+    其他方法将在验证完成后逐步恢复。
     """
     
     def __init__(self, prompts_dir: str = None):
@@ -113,47 +149,49 @@ class PromptManager:
         Returns:
             {'category': 'volume_analysis', 'method': 'vpa_classic', 'display_name': 'VPA经典分析'}
         """
+        # ==== Al Brooks 验证期方法映射 ====
+        # 注意：为确保分析质量，当前仅支持Al Brooks价格行为分析方法
+        # 其他方法已暂时禁用，将在验证完成后逐步恢复
+        # 完整方法列表备份位于: prompt_manager_full.py.backup
+        
         method_mapping = {
-            # VPA分析方法 (简短格式)
-            'vpa-classic': {'category': 'volume_analysis', 'method': 'vpa_classic', 'display_name': 'VPA经典分析'},
-            'vsa-coulling': {'category': 'volume_analysis', 'method': 'vsa_coulling', 'display_name': 'Anna Coulling VSA'},
-            'volume-profile': {'category': 'volume_analysis', 'method': 'volume_profile', 'display_name': '成交量分布分析'},
-            
-            # VPA分析方法 (完整格式)
-            'volume-analysis-vpa-classic': {'category': 'volume_analysis', 'method': 'vpa_classic', 'display_name': 'VPA经典分析'},
-            'volume-analysis-vsa-coulling': {'category': 'volume_analysis', 'method': 'vsa_coulling', 'display_name': 'Anna Coulling VSA'},
-            'volume-analysis-volume-profile': {'category': 'volume_analysis', 'method': 'volume_profile', 'display_name': '成交量分布分析'},
-            
-            # ICT概念方法 (简短格式)  
-            'ict-liquidity': {'category': 'ict_concepts', 'method': 'liquidity_zones', 'display_name': 'ICT流动性分析'},
-            'ict-orderblocks': {'category': 'ict_concepts', 'method': 'order_blocks', 'display_name': 'ICT订单块分析'},
-            'ict-fvg': {'category': 'ict_concepts', 'method': 'fair_value_gaps', 'display_name': 'ICT公允价值缺口'},
-            'ict-structure': {'category': 'ict_concepts', 'method': 'market_structure', 'display_name': 'ICT市场结构'},
-            
-            # ICT概念方法 (完整格式)
-            'ict-concepts-liquidity-zones': {'category': 'ict_concepts', 'method': 'liquidity_zones', 'display_name': 'ICT流动性分析'},
-            'ict-concepts-order-blocks': {'category': 'ict_concepts', 'method': 'order_blocks', 'display_name': 'ICT订单块分析'},
-            'ict-concepts-fair-value-gaps': {'category': 'ict_concepts', 'method': 'fair_value_gaps', 'display_name': 'ICT公允价值缺口'},
-            'ict-concepts-market-structure': {'category': 'ict_concepts', 'method': 'market_structure', 'display_name': 'ICT市场结构'},
-            
-            # 价格行为分析 (简短格式)
-            'pa-support-resistance': {'category': 'price_action', 'method': 'support_resistance', 'display_name': '支撑阻力分析'},
-            'pa-trend': {'category': 'price_action', 'method': 'trend_analysis', 'display_name': '趋势分析'},
-            'pa-breakout': {'category': 'price_action', 'method': 'breakout_patterns', 'display_name': '突破形态分析'},
-            
-            # 价格行为分析 (完整格式)
-            'price-action-support-resistance': {'category': 'price_action', 'method': 'support_resistance', 'display_name': '支撑阻力分析'},
-            'price-action-trend-analysis': {'category': 'price_action', 'method': 'trend_analysis', 'display_name': '趋势分析'},
-            'price-action-breakout-patterns': {'category': 'price_action', 'method': 'breakout_patterns', 'display_name': '突破形态分析'},
+            # Al Brooks 价格行为分析方法（验证期唯一支持）
+            'al-brooks': {'category': 'price_action', 'method': 'al_brooks_analysis', 'display_name': 'Al Brooks价格行为分析'},
             'price-action-al-brooks-analysis': {'category': 'price_action', 'method': 'al_brooks_analysis', 'display_name': 'Al Brooks价格行为分析'},
             
-            # 综合分析
-            'multi-timeframe': {'category': 'composite', 'method': 'multi_timeframe', 'display_name': '多时间框架分析'},
-            'perpetual-specific': {'category': 'composite', 'method': 'perpetual_specific', 'display_name': '永续合约专项分析'}
+            # ==== 暂时禁用的方法 ====
+            # 将在Al Brooks验证完成后按以下顺序恢复：
+            # 1. VPA经典分析 (基础重要)
+            # 2. ICT公允价值缺口 (流行方法) 
+            # 3. 其他ICT和价格行为方法
+            # 4. 高级综合分析方法
+            
+            # VPA分析方法 (暂时禁用)
+            # 'vpa-classic': {'category': 'volume_analysis', 'method': 'vpa_classic', 'display_name': 'VPA经典分析'},
+            # 'vsa-coulling': {'category': 'volume_analysis', 'method': 'vsa_coulling', 'display_name': 'Anna Coulling VSA'},
+            # 'volume-profile': {'category': 'volume_analysis', 'method': 'volume_profile', 'display_name': '成交量分布分析'},
+            
+            # ICT概念方法 (暂时禁用)
+            # 'ict-liquidity': {'category': 'ict_concepts', 'method': 'liquidity_zones', 'display_name': 'ICT流动性分析'},
+            # 'ict-orderblocks': {'category': 'ict_concepts', 'method': 'order_blocks', 'display_name': 'ICT订单块分析'},
+            # 'ict-fvg': {'category': 'ict_concepts', 'method': 'fair_value_gaps', 'display_name': 'ICT公允价值缺口'},
+            
+            # 其他价格行为分析 (暂时禁用)
+            # 'pa-support-resistance': {'category': 'price_action', 'method': 'support_resistance', 'display_name': '支撑阻力分析'},
+            # 'pa-trend': {'category': 'price_action', 'method': 'trend_analysis', 'display_name': '趋势分析'},
+            
+            # 综合分析 (暂时禁用)
+            # 'multi-timeframe': {'category': 'composite', 'method': 'multi_timeframe', 'display_name': '多时间框架分析'},
+            # 'perpetual-specific': {'category': 'composite', 'method': 'perpetual_specific', 'display_name': '永续合约专项分析'}
         }
         
         if full_method not in method_mapping:
-            raise ValueError(f"未知的分析方法: {full_method}")
+            # Al Brooks验证期友好错误提示
+            available_methods = list(method_mapping.keys())
+            raise ValueError(f"\n❌ 当前验证期仅支持Al Brooks分析方法。\n" +
+                           f"🔍 可用方法: {available_methods}\n" +
+                           f"📝 请使用: --method price-action-al-brooks-analysis\n" +
+                           f"ℹ️  其他方法将在Al Brooks验证完成后逐步恢复。")
         
         return method_mapping[full_method]
     
@@ -247,37 +285,66 @@ class PromptManager:
         return min(100, score)
     
     def _evaluate_pa_quality(self, analysis_text: str, df: Any) -> int:
-        """价格行为分析质量评估（增强Al Brooks支持）"""
+        """价格行为分析质量评估（优化Al Brooks支持）- 新权重分配"""
         score = 0
+        text_lower = analysis_text.lower()
         
-        # 1. Al Brooks专业术语检测 (30分)
-        al_brooks_terms = ['always in', 'pin bar', 'inside bar', 'outside bar', 'trend bar', 
-                          'follow through', 'pullback', 'two-legged', 'wedge', 'channel',
-                          'climax', 'reversal', 'breakout', 'flag', 'swing point', 'trend line']
-        brooks_term_count = sum(1 for term in al_brooks_terms if term.lower() in analysis_text.lower())
-        score += min(30, brooks_term_count * 2)
+        # === 优化权重分配：分析质量60分 + 术语准确40分 ===
         
-        # 2. 传统价格行为术语 (20分)
-        pa_terms = ['支撑', '阻力', 'support', 'resistance', '突破', '假突破', 
-                   '回撤', '形态', 'pattern', '趋势线', 'trendline']
-        term_count = sum(1 for term in pa_terms if term.lower() in analysis_text.lower())
-        score += min(20, term_count * 2)
+        # 1. 结构分析深度 (30分) - 提高权重
+        structure_score = 0
+        # Always In状态分析
+        always_in_terms = BROOKS_TERM_MAPPING['always_in_concepts']
+        if any(term.lower() in text_lower for term in always_in_terms):
+            structure_score += 15
         
-        # 3. Al Brooks结构分析 (25分)
-        structure_keywords = ['always in long', 'always in short', 'transitioning', '市场状态',
-                            'swing high', 'swing low', 'trend strength', '趋势强度']
-        if any(keyword.lower() in analysis_text.lower() for keyword in structure_keywords):
-            score += 25
+        # 结构识别 (swing points, H1/H2等)
+        structure_terms = BROOKS_TERM_MAPPING['structure_analysis']
+        structure_count = sum(1 for term in structure_terms if term.lower() in text_lower)
+        structure_score += min(15, structure_count * 3)
+        score += min(30, structure_score)
         
-        # 4. 具体交易计划 (15分)
-        plan_keywords = ['入场条件', '入场价位', '止损价位', '目标价位', '仓位建议',
-                        'entry condition', 'stop loss', 'target', 'position size']
-        plan_count = sum(1 for kw in plan_keywords if kw.lower() in analysis_text.lower())
-        score += min(15, plan_count * 3)
+        # 2. 交易计划完整性 (20分) - 提高权重
+        plan_score = 0
+        risk_terms = BROOKS_TERM_MAPPING['risk_management']
+        plan_count = sum(1 for term in risk_terms if term.lower() in text_lower)
+        plan_score = min(20, plan_count * 4)
+        score += plan_score
         
-        # 5. 关键价位引用 (10分)
-        if any(str(round(price, 2)) in analysis_text for price in df['close'].values[-5:]):
-            score += 10
+        # 3. Brooks概念应用 (10分) - 概念深度
+        concept_terms = BROOKS_TERM_MAPPING['brooks_concepts']
+        concept_count = sum(1 for term in concept_terms if term.lower() in text_lower)
+        score += min(10, concept_count * 2)
+        
+        # 4. Brooks术语准确性 (25分) - 使用映射表
+        term_score = 0
+        bar_patterns = BROOKS_TERM_MAPPING['bar_patterns']
+        pattern_count = sum(1 for pattern in bar_patterns if pattern.lower() in text_lower)
+        term_score = min(25, pattern_count * 3)
+        score += term_score
+        
+        # 5. 具体价位引用 (15分) - 提高权重，体现数据结合
+        price_score = 0
+        # 检查最近5个价位的引用
+        recent_prices = df['close'].values[-5:]
+        price_matches = sum(1 for price in recent_prices 
+                          if str(round(float(price), 2)) in analysis_text)
+        price_score += price_matches * 5
+        
+        # 检查关键价位（支撑阻力）的数值引用
+        if any(keyword in text_lower for keyword in ['support', '支撑', 'resistance', '阻力']):
+            price_score += 5
+        
+        score += min(15, price_score)
+        
+        # === 质量加分项 ===
+        # JSON格式完整性奖励 (额外5分)
+        if 'schema_version' in text_lower and 'always_in_state' in text_lower:
+            score += 5
+            
+        # 风险管理细节奖励 (额外5分)
+        if any(term in text_lower for term in ['structural stop', 'measured move', 'magnet']):
+            score += 5
         
         return min(100, score)
     

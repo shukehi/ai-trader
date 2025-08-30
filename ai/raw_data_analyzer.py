@@ -65,6 +65,18 @@ class RawDataAnalyzer:
             if df is None or len(df) == 0:
                 raise ValueError("数据为空")
             
+            # Al Brooks方法需要足够的历史数据进行结构分析
+            if analysis_method and ('al-brooks' in analysis_method or 'brooks' in analysis_method):
+                min_bars_needed = 120
+                if len(df) < min_bars_needed:
+                    logger.warning(f"⚠️ Al Brooks分析建议至少{min_bars_needed}根K线，当前仅{len(df)}根，可能影响分析质量")
+                    # 不抛出异常，但记录警告
+            elif analysis_method:
+                # 其他方法的最小数据量检查
+                min_bars_needed = 50
+                if len(df) < min_bars_needed:
+                    logger.warning(f"⚠️ {analysis_method}分析建议至少{min_bars_needed}根K线，当前仅{len(df)}根")
+            
             # 格式化原始数据 (使用最优的CSV格式)
             formatted_data = self.formatter.to_csv_format(df, include_volume=True)
             

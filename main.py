@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 def analyze(
     symbol: Annotated[str, typer.Option("--symbol", "-s", help="交易对符号")] = "ETHUSDT",
     timeframe: Annotated[str, typer.Option("--timeframe", "-t", help="时间周期")] = "1h", 
-    limit: Annotated[int, typer.Option("--limit", "-l", help="K线数据数量")] = 50,
+    limit: Annotated[int, typer.Option("--limit", "-l", help="K线数据数量")] = 120,
     model: Annotated[str, typer.Option("--model", "-m", help="AI模型")] = "gemini-flash",
     analysis_type: Annotated[str, typer.Option("--analysis-type", "-a", help="分析类型")] = "complete",
     analysis_method: Annotated[Optional[str], typer.Option("--method", help="分析方法")] = None,
@@ -151,45 +151,70 @@ def analyze(
 
 @app.command()
 def methods():
-    """📋 列出所有可用的分析方法"""
+    """📋 列出所有可用的分析方法 (Al Brooks验证期)"""
     
+    # 验证期特殊标题
     console.print(Panel.fit(
-        "📚 [bold blue]AI-Trader 分析方法库[/bold blue]",
-        border_style="blue"
+        "🧪 [bold yellow]AI-Trader 分析方法库 - Al Brooks验证期[/bold yellow]",
+        border_style="yellow"
     ))
+    
+    # 验证期说明
+    console.print(Panel(
+        "ℹ️  [bold blue]当前状态说明[/bold blue]\n\n"
+        "为确保分析质量，系统当前仅支持 Al Brooks 价格行为分析方法。\n"
+        "其他方法将在验证完成后按优先级逐步恢复：\n\n"
+        "📋 [yellow]计划恢复顺序[/yellow]:\n"
+        "   1️⃣  VPA经典分析 (基础重要)\n"
+        "   2️⃣  ICT公允价值缺口 (流行方法)\n"
+        "   3️⃣  其他ICT和价格行为方法\n"
+        "   4️⃣  高级综合分析方法\n\n"
+        "📞 如需完整方法库，请查看: prompt_manager_full.py.backup",
+        border_style="blue",
+        title="验证期信息"
+    ))
+    console.print()
     
     try:
         prompt_manager = PromptManager()
-        methods = prompt_manager.list_available_methods()
         
-        for category, method_list in methods.items():
-            # 创建分类表格
-            table = Table(title=f"🔸 {category.replace('_', ' ').title()}", show_header=True)
-            table.add_column("方法名称", style="cyan", width=40)
-            table.add_column("命令参数", style="yellow", width=50)
-            table.add_column("描述", style="white")
-            
-            for method in method_list:
-                method_key = f"{category.replace('_', '-')}-{method.replace('_', '-')}"
-                try:
-                    method_info = prompt_manager.get_method_info(method_key)
-                    display_name = method_info.get('display_name', method.replace('_', ' ').title())
-                    description = method_info.get('description', '专业分析方法')[:50]
-                except:
-                    display_name = method.replace('_', ' ').title()
-                    description = '专业分析方法'
-                
-                table.add_row(
-                    display_name,
-                    f"--method {method_key}",
-                    description
-                )
-            
-            console.print(table)
-            console.print()
-            
+        # 创建Al Brooks专用表格
+        table = Table(title="🎯 当前可用分析方法", show_header=True)
+        table.add_column("方法名称", style="cyan", width=40)
+        table.add_column("简短命令", style="green", width=25)
+        table.add_column("完整命令", style="yellow", width=40)
+        table.add_column("状态", style="white", width=15)
+        
+        # Al Brooks方法信息
+        table.add_row(
+            "Al Brooks价格行为分析",
+            "--method al-brooks", 
+            "--method price-action-al-brooks-analysis",
+            "🟢 验证中"
+        )
+        
+        console.print(table)
+        console.print()
+        
+        # 使用示例
+        example_panel = Panel(
+            "💡 [bold green]使用示例[/bold green]\n\n"
+            "🔸 基础分析:\n"
+            "   [cyan]python main.py analyze --method al-brooks[/cyan]\n\n"
+            "🔸 指定交易对:\n"
+            "   [cyan]python main.py analyze --method al-brooks --symbol BTCUSDT[/cyan]\n\n"
+            "🔸 多时间周期分析:\n"
+            "   [cyan]python main.py multi-analyze --method al-brooks --timeframes '1h,4h,1d'[/cyan]\n\n"
+            "🔸 详细输出:\n"
+            "   [cyan]python main.py analyze --method al-brooks --verbose[/cyan]",
+            title="快速开始",
+            border_style="green"
+        )
+        console.print(example_panel)
+        
     except Exception as e:
         console.print(f"❌ 加载分析方法失败: {e}", style="red")
+        console.print("💡 提示: 请确保Al Brooks提示词文件存在: prompts/price_action/al_brooks_analysis.txt", style="yellow")
 
 
 @app.command()
