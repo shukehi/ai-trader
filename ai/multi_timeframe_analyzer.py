@@ -262,7 +262,7 @@ class MultiTimeframeAnalyzer:
     
     def analyze_multi_timeframe(self, 
                                symbol: str = "ETHUSDT",
-                               model: str = "gemini-flash",
+                               model: str = "gpt5-chat",
                                analysis_type: str = "complete",
                                analysis_method: Optional[str] = None,
                                scenario: Optional[AnalysisScenario] = None,

@@ -42,7 +42,7 @@ class RawDataAnalyzer:
     
     def analyze_raw_ohlcv(self, 
                          df: pd.DataFrame,
-                         model: str = 'gemini-flash',
+                         model: str = 'gpt5-chat',
                          analysis_type: str = 'simple',
                          analysis_method: Optional[str] = None,
                          symbol: Optional[str] = "ETHUSDT",
@@ -55,7 +55,7 @@ class RawDataAnalyzer:
         
         Args:
             df: 原始OHLCV数据DataFrame  
-            model: AI模型 ('gemini-flash', 'gpt4o-mini', 'gpt5-mini', etc.)
+            model: AI模型 ('gpt5-chat', 'claude-opus-41', 'gemini-25-pro', 'grok4')
             analysis_type: 分析类型 ('simple', 'complete', 'enhanced')
             analysis_method: 分析方法 ('vpa-classic', 'ict-liquidity', 'pa-trend', etc.)
             
@@ -95,9 +95,51 @@ class RawDataAnalyzer:
             effective_fees_bps = 5.0 if fees_bps is None else float(fees_bps)
             effective_slip_ticks = 1 if slippage_ticks is None else int(slippage_ticks)
 
-            # 计算 EMA20 并作为磁吸位
-            ema20_val = ema(used_df['close'], period=20)
-            ema20_val = round_to_tick(ema20_val, effective_tick)
+            # 元数据校验（fail-fast，不抛异常，返回诊断）
+            if effective_tick is None or effective_tick <= 0 or effective_fees_bps is None or effective_slip_ticks is None or venue == 'Unknown':
+                diagnostics = {
+                    'tick_rounded': False,
+                    'rr_includes_fees_slippage': False,
+                    'used_closed_bar_only': True,
+                    'metadata_locked': False,
+                    'htf_veto_respected': True,
+                    'reason': 'hard_gate_failed'
+                }
+                result = {
+                    'analysis_text': 'Fail-fast: invalid or unknown metadata.',
+                    'quality_score': 50,
+                    'performance_metrics': {
+                        'analysis_time': round(time.time() - start_time, 2),
+                        'data_points': bars_analyzed
+                    },
+                    'model_info': {
+                        'model_used': model,
+                        'analysis_type': analysis_type,
+                        'data_format': 'csv_raw'
+                    },
+                    'metadata': {
+                        'venue': venue,
+                        'timezone': timezone,
+                        'symbol': symbol,
+                        'tick_size': effective_tick,
+                        'fees_bps': effective_fees_bps,
+                        'slippage_ticks': effective_slip_ticks
+                    },
+                    'diagnostics': diagnostics,
+                    'timeframes': [
+                        {'timeframe': timeframe, 'bars_analyzed': bars_analyzed}
+                    ],
+                    'success': True
+                }
+                return result
+
+            # 计算 EMA20 并作为磁吸位（失败则fail-fast）
+            try:
+                ema20_val = ema(used_df['close'], period=20)
+                ema20_val = round_to_tick(ema20_val, effective_tick)
+                ema_missing = False
+            except Exception:
+                ema_missing = True
 
             # 格式化原始数据 (CSV)
             formatted_data = self.formatter.to_csv_format(used_df, include_volume=True)
@@ -173,7 +215,6 @@ class RawDataAnalyzer:
             
             # 规划交易方案（演示版，基于EMA与近期结构，含费用与滑点）
             last_close = float(used_df['close'].iloc[-1])
-            last_open = float(used_df['open'].iloc[-1])
             side = 'long' if last_close >= ema20_val else 'short'
 
             # 初始参数（仅使用已闭合K线信息）
@@ -194,26 +235,72 @@ class RawDataAnalyzer:
                 entry=entry_raw, stop=stop_raw, target=t1_raw, side=side,
                 tick=effective_tick, fees_bps=effective_fees_bps, slippage_ticks=effective_slip_ticks
             )
+            rr_initial = round(rr_initial, 2)
 
             auto_adjustment = None
             if rr_initial < 1.5:
+                # 尝试(a) 结构内更紧止损
                 if side == 'long':
-                    # 尝试在结构内收紧止损（使用最近5根最低值+1tick）
                     candidate = round_to_tick(used_df['low'].tail(5).max() + effective_tick, effective_tick)
-                    stop_adj = min(candidate, entry_raw - effective_tick)
+                    stop_tight = min(candidate, entry_raw - effective_tick)
                 else:
                     candidate = round_to_tick(used_df['high'].tail(5).min() - effective_tick, effective_tick)
-                    stop_adj = max(candidate, entry_raw + effective_tick)
-                rr_after = rr_with_costs(
-                    entry=entry_raw, stop=stop_adj, target=t1_raw, side=side,
+                    stop_tight = max(candidate, entry_raw + effective_tick)
+
+                rr_tight = rr_with_costs(
+                    entry=entry_raw, stop=stop_tight, target=t1_raw, side=side,
                     tick=effective_tick, fees_bps=effective_fees_bps, slippage_ticks=effective_slip_ticks
                 )
-                auto_adjustment = {
-                    'applied': True,
-                    'reason': 'tighten_stop_within_structure' if rr_after >= rr_initial else 'lower_T1_to_nearest_magnet',
-                    'new_stop': stop_adj,
-                    'new_rr': rr_after
-                }
+                rr_tight = round(rr_tight, 2)
+
+                # 预计算标准化 measured move（最近20根高低差）
+                recent = used_df.tail(20)
+                rng_low = float(recent['low'].min())
+                rng_high = float(recent['high'].max())
+                height = round_to_tick(abs(rng_high - rng_low), effective_tick)
+                basis = f"range {round_to_tick(rng_low, effective_tick)}–{round_to_tick(rng_high, effective_tick)}"
+                if side == 'long':
+                    mm_target = round_to_tick(entry_raw + height, effective_tick)
+                    formula = f"target = entry + height"
+                else:
+                    mm_target = round_to_tick(entry_raw - height, effective_tick)
+                    formula = f"target = entry - height"
+
+                # 尝试(b) 下调T1至最近磁吸/测量移动
+                t1_lower = None
+                # 优先磁吸位（仅当方向一致且有效）
+                if side == 'long' and ema20_val > entry_raw:
+                    t1_lower = round_to_tick(ema20_val, effective_tick)
+                elif side == 'short' and ema20_val < entry_raw:
+                    t1_lower = round_to_tick(ema20_val, effective_tick)
+                # 备用：标准化测量移动
+                if t1_lower is None:
+                    t1_lower = mm_target
+
+                rr_lower = rr_with_costs(
+                    entry=entry_raw, stop=stop_raw, target=t1_lower, side=side,
+                    tick=effective_tick, fees_bps=effective_fees_bps, slippage_ticks=effective_slip_ticks
+                )
+                rr_lower = round(rr_lower, 2)
+
+                if rr_tight >= 1.5 and rr_tight >= rr_lower:
+                    # 应用更紧止损
+                    stop_raw = stop_tight
+                    rr_initial = rr_tight
+                    auto_adjustment = {
+                        'applied': True,
+                        'reason': 'rr_below_threshold',
+                        'option': 'tighter_stop'
+                    }
+                else:
+                    # 应用下调T1
+                    t1_raw = t1_lower
+                    rr_initial = rr_lower
+                    auto_adjustment = {
+                        'applied': True,
+                        'reason': 'rr_below_threshold',
+                        'option': 'lower_t1'
+                    }
 
             # 负索引信号（-1为最后一根已闭合K线）
             signals = [
@@ -235,9 +322,13 @@ class RawDataAnalyzer:
                 'tick_rounded': True,
                 'rr_includes_fees_slippage': True,
                 'used_closed_bar_only': True,
-                'metadata_locked': all(v is not None for v in [venue, timezone, effective_tick, effective_fees_bps, effective_slip_ticks]),
+                'metadata_locked': all(v is not None for v in [venue, timezone, effective_tick, effective_fees_bps, effective_slip_ticks]) and venue != 'Unknown',
                 'htf_veto_respected': True
             }
+
+            # 如果EMA缺失，触发fail-fast
+            if ema_missing:
+                diagnostics['ema_missing'] = True
 
             # 级别与磁吸位
             levels = {
@@ -257,6 +348,21 @@ class RawDataAnalyzer:
                 {
                     'timeframe': timeframe,
                     'bars_analyzed': bars_analyzed
+                }
+            ]
+
+            # 标准化测量移动（用于输出与计划引用）
+            recent = used_df.tail(20)
+            rng_low = float(recent['low'].min())
+            rng_high = float(recent['high'].max())
+            height = round_to_tick(abs(rng_high - rng_low), effective_tick)
+            basis = f"range {round_to_tick(rng_low, effective_tick)}–{round_to_tick(rng_high, effective_tick)}"
+            measured_moves = [
+                {
+                    'basis': basis,
+                    'height': height,
+                    'formula': 'target = entry + height' if side == 'long' else 'target = entry - height',
+                    'target': round_to_tick(entry_raw + height, effective_tick) if side == 'long' else round_to_tick(entry_raw - height, effective_tick)
                 }
             ]
 
@@ -291,6 +397,7 @@ class RawDataAnalyzer:
                     'auto_adjustment': auto_adjustment,
                     'scaling': scaling
                 },
+                'measured_moves': measured_moves,
                 'signals': signals,
                 'diagnostics': diagnostics,
                 'timeframes': timeframes_info,
@@ -304,7 +411,14 @@ class RawDataAnalyzer:
                 },
                 'success': True
             }
-            
+
+            # 诊断硬门禁：任何false则fail-fast，不输出plan，降质评分
+            hard_keys = ['tick_rounded', 'rr_includes_fees_slippage', 'used_closed_bar_only', 'metadata_locked', 'htf_veto_respected']
+            if any(not result['diagnostics'].get(k, False) for k in hard_keys) or diagnostics.get('ema_missing'):
+                result['diagnostics']['reason'] = 'hard_gate_failed'
+                result['quality_score'] = min(result['quality_score'], 50)
+                result.pop('plan', None)
+
             logger.info(f"✅ AI分析完成 - 质量: {quality_score}/100, 耗时: {analysis_time:.2f}s")
             return result
             
@@ -318,7 +432,7 @@ class RawDataAnalyzer:
     
     def analyze_raw_ohlcv_sync(self, 
                               df: pd.DataFrame,
-                              model: str = 'gemini-flash',
+                              model: str = 'gpt5-chat',
                               analysis_type: str = 'simple') -> Dict[str, Any]:
         """
         同步版本的AI直接分析 (与原始测试套件兼容) 
@@ -399,12 +513,10 @@ class RawDataAnalyzer:
     def get_supported_models(self) -> List[str]:
         """获取支持的AI模型列表"""
         return [
-            'gemini-flash',     # 推荐：最快+最经济
-            'gpt4o-mini',       # 平衡：质量+成本
-            'gpt5-mini',        # 高质量
-            'claude-haiku',     # 简洁分析
-            'claude-opus-41',   # 最高质量
-            'grok4'             # 创新分析
+            'gpt5-chat',        # 推荐：GPT-5最新模型
+            'claude-opus-41',   # 最高质量推理
+            'gemini-25-pro',    # 大容量上下文
+            'grok4'             # 快速响应
         ]
     
     def get_analysis_capabilities(self) -> Dict[str, Any]:

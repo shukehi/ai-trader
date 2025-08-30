@@ -31,7 +31,7 @@ class AnalysisEngine:
     def raw_data_analysis(self, 
                          df: pd.DataFrame,
                          analysis_type: str = 'complete',
-                         model: str = 'gemini-flash') -> Dict[str, Any]:
+                         model: str = 'gpt5-chat') -> Dict[str, Any]:
         """
         AI直接分析原始OHLCV数据
         

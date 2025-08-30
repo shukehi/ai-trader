@@ -43,7 +43,7 @@ class RealtimeConfig:
     timeframes: List[str] = field(default_factory=lambda: ["5m", "15m", "1h", "4h"])
     base_frequency: AnalysisFrequency = AnalysisFrequency.NORMAL
     adaptive_frequency: bool = True
-    model: str = "gemini-flash"
+    model: str = "gpt5-chat"
     analysis_type: str = "complete"
     analysis_method: Optional[str] = None
     volatility_threshold: float = 0.02  # 2%波动率阈值

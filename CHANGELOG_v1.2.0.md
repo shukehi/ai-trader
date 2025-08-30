@@ -1,5 +1,28 @@
 # AI-Trader v1.2.0 变更日志
 
+## v1.2.1 – Brooks规则与质量校验强化 (2025-08-30)
+
+### 新增
+- RR/EMA 工具：`ai/rr_utils.py`（含费用与滑点的RR、tick四舍五入）、`ai/indicators.py`（EMA20）。
+- 测试用例：`tests/test_brooks_quality.py` 覆盖元数据一致性、RR数学、EMA20磁吸位、信号负索引、诊断布尔项。
+
+### 变更
+- `ai/raw_data_analyzer.py`：
+  - 仅使用已收盘K线并统计 `bars_analyzed`。
+  - 输出锁定元数据：`venue=Binance-Perp`、`timezone=UTC`、`tick_size/fees_bps/slippage_ticks`。
+  - 计算 `EMA(20)` 并加入 `levels.magnets`；所有价格按 tick 四舍五入。
+  - 交易计划RR包含费用与滑点；若 `RR < 1.5` 自动调整（结构内更紧止损或下调T1）。
+  - `signals[].bar_index` 改为相对最后已收盘K线的负索引（`-1`）。
+  - 增加诊断布尔：`tick_rounded`、`rr_includes_fees_slippage`、`used_closed_bar_only`、`metadata_locked`、`htf_veto_respected`。
+  - 无网络/失败时启用离线回退，保证测试可运行。
+- `prompts/prompt_manager.py`：为 Brooks 方法标注 `requires_metadata`。
+
+### 影响
+- 提升 Brooks 分析在一致性、可验证性与风险控制方面的质量，目标区间 80–85。
+
+### 提交
+- feat(brooks): add RR/EMA utils and enforce metadata/indexing/diagnostics; offline fallback; tests; README note
+
 ## 🎊 Al Brooks质量评分优化版本 (2025-08-29)
 
 ### 🚀 重大突破: 质量评分大幅提升

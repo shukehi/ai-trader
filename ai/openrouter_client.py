@@ -26,11 +26,96 @@ class OpenRouterClient:
         self.models = Settings.MODELS
         self.token_limits = Settings.TOKEN_LIMITS
     
+    def _estimate_tokens(self, text: str) -> int:
+        """
+        更精确的token估算方法
+        使用启发式规则：平均1个token约等于0.75个单词或4个字符
+        """
+        if not text:
+            return 0
+        
+        # 方法1：基于单词数的估算
+        word_count = len(text.split())
+        word_based_tokens = int(word_count / 0.75)
+        
+        # 方法2：基于字符数的估算  
+        char_count = len(text)
+        char_based_tokens = int(char_count / 4)
+        
+        # 取更大值作为保守估计
+        estimated_tokens = max(word_based_tokens, char_based_tokens)
+        
+        # 添加10%的安全边距
+        return int(estimated_tokens * 1.1)
+    
+    def _get_fallback_models(self, current_model: str) -> List[str]:
+        """
+        根据当前模型获取降级备选方案
+        按token容量从大到小排序
+        """
+        model_capacities = [
+            ('gemini-25-pro', 2097152),
+            ('claude-opus-41', 200000), 
+            ('grok4', 131072),
+            ('gpt5-chat', 128000)
+        ]
+        
+        # 找到当前模型的容量
+        current_capacity = self.token_limits.get(current_model, 0)
+        
+        # 返回比当前模型容量更大的模型列表
+        fallback_models = [
+            model for model, capacity in model_capacities 
+            if capacity > current_capacity and model in self.models
+        ]
+        
+        return fallback_models
+    
+    def _try_fallback_model(self, data: str, original_model: str, analysis_type: str, 
+                           system_prompt: str, original_error: Exception) -> Optional[Dict[str, Any]]:
+        """
+        当原模型token超限时，尝试使用更大容量的模型
+        """
+        fallback_models = self._get_fallback_models(original_model)
+        
+        if not fallback_models:
+            logger.warning(f"没有可用的降级模型，原模型: {original_model}")
+            return None
+        
+        logger.info(f"Token超限，尝试降级到更大容量模型: {fallback_models}")
+        
+        for fallback_model in fallback_models:
+            try:
+                logger.info(f"尝试使用降级模型: {fallback_model}")
+                
+                # 递归调用，但标记为降级尝试
+                result = self.analyze_market_data(
+                    data=data, 
+                    model_name=fallback_model, 
+                    analysis_type=analysis_type,
+                    custom_prompt=system_prompt,
+                    _is_fallback=True
+                )
+                
+                if result.get('success', False):
+                    result['fallback_from'] = original_model
+                    result['fallback_reason'] = str(original_error)
+                    logger.info(f"成功使用降级模型 {fallback_model} 完成分析")
+                    return result
+                
+            except Exception as e:
+                logger.warning(f"降级模型 {fallback_model} 也失败: {e}")
+                continue
+        
+        logger.error("所有降级模型都失败")
+        return None
+    
     def analyze_market_data(self, 
                           data: str, 
                           model_name: str = 'gpt4',
                           analysis_type: str = 'general',
-                          custom_prompt: Optional[str] = None) -> Dict[str, Any]:
+                          custom_prompt: Optional[str] = None,
+                          _is_fallback: bool = False) -> Dict[str, Any]:
         """
         分析市场数据
         
@@ -54,30 +139,41 @@ class OpenRouterClient:
             else:
                 system_prompt = self._get_system_prompt(analysis_type)
             
-            # 估算token数量
-            estimated_tokens = len(data.split()) + len(system_prompt.split())
+            # 改进的token估算 - 使用更精确的方法
+            estimated_input_tokens = self._estimate_tokens(data) + self._estimate_tokens(system_prompt)
             max_model_tokens = self.token_limits.get(model_name, 32000)
             
-            # 根据分析类型动态分配响应空间比例
+            # 添加保守的安全边距 (20%)
+            safe_model_limit = int(max_model_tokens * 0.8)
+            
+            # 检查输入是否超限
+            if estimated_input_tokens > safe_model_limit:
+                raise ValueError(f"输入token数量 ({estimated_input_tokens}) 超过模型安全限制 ({safe_model_limit})")
+            
+            # 根据分析类型动态分配响应空间比例，但更保守
             response_ratios = {
-                'general': 0.3,
-                'vpa': 0.5,
-                'technical': 0.4,
-                'pattern': 0.4,
-                'perpetual_vpa': 0.6,  # VPA分析需要更多空间
-                'raw_vpa': 0.5
+                'general': 0.25,
+                'vpa': 0.35,
+                'technical': 0.30,
+                'pattern': 0.30,
+                'perpetual_vpa': 0.40,  # VPA分析需要更多空间
+                'raw_vpa': 0.35,
+                'complete': 0.30  # 添加complete类型
             }
-            response_ratio = response_ratios.get(analysis_type, 0.4)
+            response_ratio = response_ratios.get(analysis_type, 0.25)
             
-            # 计算可用的响应token数
-            available_response_tokens = int((max_model_tokens - estimated_tokens) * response_ratio)
-            # 确保至少有1000个token用于响应，但不超过模型剩余容量
-            max_response_tokens = max(1000, min(available_response_tokens, max_model_tokens - estimated_tokens - 500))
+            # 计算可用的响应token数，确保总和不超过安全限制
+            available_response_tokens = safe_model_limit - estimated_input_tokens
+            max_response_tokens = max(1000, min(
+                int(available_response_tokens * response_ratio),
+                available_response_tokens - 1000  # 额外安全边距
+            ))
             
-            if estimated_tokens > max_model_tokens * 0.7:  # 调整为70%预警阈值
-                logger.warning(f"输入token较多 ({estimated_tokens} > {max_model_tokens * 0.7})，响应空间: {max_response_tokens}")
+            total_tokens = estimated_input_tokens + max_response_tokens
+            if total_tokens > safe_model_limit:
+                logger.warning(f"预计总token ({total_tokens}) 接近限制 ({safe_model_limit})")
             
-            logger.info(f"使用模型 {model_id} 分析数据，输入token: {estimated_tokens}, 最大响应token: {max_response_tokens}")
+            logger.info(f"使用模型 {model_id} 分析数据，输入token: {estimated_input_tokens}, 最大响应token: {max_response_tokens}, 总计: {total_tokens}/{max_model_tokens}")
             
             start_time = time.time()
             
@@ -112,10 +208,19 @@ class OpenRouterClient:
             return result
             
         except Exception as e:
-            logger.error(f"分析失败: {e}")
+            error_message = str(e)
+            logger.error(f"分析失败: {error_message}")
+            
+            # 检查是否是token限制错误，如果是则尝试降级（但不是已经在降级过程中）
+            if not _is_fallback and ("maximum context length" in error_message or "tokens" in error_message):
+                fallback_result = self._try_fallback_model(data, model_name, analysis_type, system_prompt, e)
+                if fallback_result:
+                    return fallback_result
+            
             return {
+                'success': False,
                 'model': model_name,
-                'error': str(e),
+                'error': error_message,
                 'analysis': None
             }
     
