@@ -112,6 +112,21 @@ python -c "from data import BinanceFetcher; print('✅ Data fetching ready')"
 python main.py analyze --verbose
 ```
 
+### 🧪 Brooks 质量与规则校验
+
+- 仅使用已收盘K线；`timeframes[].bars_analyzed` 与实际一致。
+- 元数据必须锁定：`venue=Binance-Perp`、`timezone=UTC`、`tick_size`、`fees_bps`、`slippage_ticks` 不得为 Unknown。
+- 价格与指标均按 `tick_size` 四舍五入；本地计算并输出 `EMA(20)` 为磁吸位。
+- 风险回报包含费用与滑点（bps、ticks）；若 `RR < 1.5` 自动调整（结构内更紧止损或下调 T1 至最近磁吸/测量移动）。
+- `signals[].bar_index` 使用相对于最后一根已收盘K线的负索引（`-1` 为最后一根）。
+- 诊断字段：`tick_rounded`、`rr_includes_fees_slippage`、`used_closed_bar_only`、`metadata_locked`、`htf_veto_respected` 全为 `true`。
+
+运行校验测试：
+
+```bash
+pytest -q
+```
+
 ## 📚 Documentation
 
 - **[CLAUDE.md](CLAUDE.md)** - Comprehensive development guide and architecture details

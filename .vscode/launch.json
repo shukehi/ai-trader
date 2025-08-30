@@ -12,9 +12,9 @@
                 "--mode", "quick"
             ],
             "console": "integratedTerminal",
-            "cwd": "/opt/ai-trader",
+            "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "/opt/ai-trader"
+                "PYTHONPATH": "${workspaceFolder}"
             },
             "stopOnEntry": false,
             "justMyCode": false
@@ -30,9 +30,9 @@
                 "--enable-validation"
             ],
             "console": "integratedTerminal",
-            "cwd": "/opt/ai-trader",
+            "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "/opt/ai-trader"
+                "PYTHONPATH": "${workspaceFolder}"
             }
         },
         {
@@ -47,9 +47,9 @@
                 "--model", "gemini-flash"
             ],
             "console": "integratedTerminal",
-            "cwd": "/opt/ai-trader",
+            "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "/opt/ai-trader",
+                "PYTHONPATH": "${workspaceFolder}",
                 "DEBUG": "1"
             }
         },
@@ -65,9 +65,9 @@
                 "--max-risk", "0.01"
             ],
             "console": "integratedTerminal",
-            "cwd": "/opt/ai-trader",
+            "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "/opt/ai-trader",
+                "PYTHONPATH": "${workspaceFolder}",
                 "DEBUG": "1"
             }
         },
@@ -82,7 +82,7 @@
                 "--limit", "30"
             ],
             "console": "integratedTerminal",
-            "cwd": "/opt/ai-trader"
+            "cwd": "${workspaceFolder}"
         },
         {
             "name": "Trading Demo Script",
@@ -90,9 +90,9 @@
             "request": "launch",
             "program": "examples/trading_demo.py",
             "console": "integratedTerminal",
-            "cwd": "/opt/ai-trader",
+            "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "/opt/ai-trader"
+                "PYTHONPATH": "${workspaceFolder}"
             }
         },
         {
@@ -102,9 +102,9 @@
             "program": "examples/websocket_demo.py",
             "args": ["15"],
             "console": "integratedTerminal",
-            "cwd": "/opt/ai-trader",
+            "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "/opt/ai-trader"
+                "PYTHONPATH": "${workspaceFolder}"
             }
         },
         {
@@ -113,9 +113,9 @@
             "request": "launch",
             "program": "test_rest_vpa.py",
             "console": "integratedTerminal",
-            "cwd": "/opt/ai-trader",
+            "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "/opt/ai-trader"
+                "PYTHONPATH": "${workspaceFolder}"
             }
         },
         {
@@ -125,9 +125,9 @@
             "program": "-m",
             "args": ["pytest", "tests/test_feasibility.py", "-v"],
             "console": "integratedTerminal",
-            "cwd": "/opt/ai-trader",
+            "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "/opt/ai-trader"
+                "PYTHONPATH": "${workspaceFolder}"
             }
         },
         {
@@ -137,9 +137,9 @@
             "program": "-m",
             "args": ["pytest", "tests/test_multi_model_validation.py", "-v"],
             "console": "integratedTerminal",
-            "cwd": "/opt/ai-trader",
+            "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "/opt/ai-trader",
+                "PYTHONPATH": "${workspaceFolder}",
                 "RUN_INTEGRATION_TESTS": "false"
             }
         },
@@ -150,9 +150,9 @@
             "program": "-m",
             "args": ["pytest", "tests/test_simulated_trading.py", "-v"],
             "console": "integratedTerminal",
-            "cwd": "/opt/ai-trader",
+            "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "/opt/ai-trader"
+                "PYTHONPATH": "${workspaceFolder}"
             }
         },
         {
@@ -162,9 +162,9 @@
             "program": "-m",
             "args": ["pytest", "tests/test_vpa_enhancement.py", "-v"],
             "console": "integratedTerminal",
-            "cwd": "/opt/ai-trader",
+            "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "/opt/ai-trader"
+                "PYTHONPATH": "${workspaceFolder}"
             }
         },
         {
@@ -174,9 +174,9 @@
             "program": "-c",
             "args": ["from data.binance_fetcher import BinanceFetcher; fetcher = BinanceFetcher(); data = fetcher.get_klines('ETHUSDT', '1h', 50); print(f'Fetched {len(data)} records'); print(data.tail())"],
             "console": "integratedTerminal",
-            "cwd": "/opt/ai-trader",
+            "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "/opt/ai-trader"
+                "PYTHONPATH": "${workspaceFolder}"
             }
         },
         {
@@ -186,9 +186,9 @@
             "program": "-c",
             "args": ["from data.vsa_calculator import VSACalculator; from data.binance_fetcher import BinanceFetcher; fetcher = BinanceFetcher(); data = fetcher.get_klines('ETHUSDT', '1h', 50); vsa = VSACalculator(); signals = vsa.calculate_vsa_signals(data); print('VSA Signals:'); print(signals.tail())"],
             "console": "integratedTerminal",
-            "cwd": "/opt/ai-trader",
+            "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "/opt/ai-trader"
+                "PYTHONPATH": "${workspaceFolder}"
             }
         },
         {
@@ -198,9 +198,9 @@
             "program": "-c",
             "args": ["from ai.openrouter_client import OpenRouterClient; client = OpenRouterClient(); response = client.analyze('Test message', model='gemini-flash'); print('Response:', response)"],
             "console": "integratedTerminal",
-            "cwd": "/opt/ai-trader",
+            "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "/opt/ai-trader"
+                "PYTHONPATH": "${workspaceFolder}"
             }
         },
         {
@@ -210,9 +210,9 @@
             "program": "monitoring/production_monitor.py",
             "args": ["--once"],
             "console": "integratedTerminal",
-            "cwd": "/opt/ai-trader",
+            "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "/opt/ai-trader"
+                "PYTHONPATH": "${workspaceFolder}"
             }
         },
         {
@@ -221,9 +221,9 @@
             "request": "launch",
             "program": "utils/cost_controller.py",
             "console": "integratedTerminal",
-            "cwd": "/opt/ai-trader",
+            "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "/opt/ai-trader"
+                "PYTHONPATH": "${workspaceFolder}"
             }
         },
         {
@@ -232,9 +232,9 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "cwd": "/opt/ai-trader",
+            "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "/opt/ai-trader"
+                "PYTHONPATH": "${workspaceFolder}"
             }
         },
         {
@@ -243,10 +243,10 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "cwd": "/opt/ai-trader",
+            "cwd": "${workspaceFolder}",
             "args": [],
             "env": {
-                "PYTHONPATH": "/opt/ai-trader"
+                "PYTHONPATH": "${workspaceFolder}"
             }
         }
     ],

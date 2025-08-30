@@ -13,7 +13,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -28,7 +28,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -43,7 +43,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -58,7 +58,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -73,7 +73,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -88,7 +88,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -103,7 +103,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -118,7 +118,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -133,7 +133,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -148,7 +148,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -163,7 +163,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -178,7 +178,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -193,7 +193,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -208,7 +208,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -223,7 +223,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -238,7 +238,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -253,7 +253,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -268,7 +268,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -283,7 +283,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -298,7 +298,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -313,7 +313,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         },
         {
@@ -328,7 +328,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "/opt/ai-trader"
+                "cwd": "${workspaceFolder}"
             }
         }
     ]

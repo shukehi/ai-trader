@@ -1,8 +1,14 @@
 from .openrouter_client import OpenRouterClient
 from .analysis_engine import AnalysisEngine
 from .raw_data_analyzer import RawDataAnalyzer
-from .multi_timeframe_analyzer import MultiTimeframeAnalyzer, AnalysisScenario, MultiTimeframeResult
-from .analysis_context import AnalysisContext, MultiTimeframeContext, SignalStrength, ContextPriority
-from .realtime_analysis_engine import RealtimeAnalysisEngine, RealtimeConfig, AnalysisFrequency, MarketCondition
 
-__all__ = ['OpenRouterClient', 'AnalysisEngine', 'RawDataAnalyzer', 'MultiTimeframeAnalyzer', 'AnalysisScenario', 'MultiTimeframeResult', 'AnalysisContext', 'MultiTimeframeContext', 'SignalStrength', 'ContextPriority', 'RealtimeAnalysisEngine', 'RealtimeConfig', 'AnalysisFrequency', 'MarketCondition']
+# 为避免在测试/离线环境中引入额外依赖，以下高级组件按需导入：
+# - multi_timeframe_analyzer
+# - realtime_analysis_engine
+# - analysis_context
+
+__all__ = [
+    'OpenRouterClient',
+    'AnalysisEngine',
+    'RawDataAnalyzer',
+]
