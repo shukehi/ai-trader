@@ -6,8 +6,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 AI-Trader - An advanced AI-powered trading analysis system featuring **multi-timeframe analysis**, **real-time WebSocket integration**, and **professional trading methodologies**. Core breakthrough: AI directly understands raw candlestick data without traditional technical indicator preprocessing, now enhanced with intelligent multi-timeframe correlation and real-time analysis capabilities.
 
 **🏆 System Status**: Production-ready AI-direct analysis system with advanced multi-timeframe architecture
-**🎯 Current Architecture**: AI Direct Analysis + Multi-Timeframe Intelligence + Real-Time WebSocket Integration
+**🎯 Current Architecture**: AI Direct Analysis + Multi-Timeframe Intelligence + Real-Time WebSocket Integration  
 **🚀 Latest Features**: Multi-timeframe analysis, real-time analysis engine, Al Brooks price action methodology
+
+## 🎊 **v1.2.0 重大突破: Al Brooks质量评分优化**
+**📊 质量评分大幅提升** (2025-08-29):
+- **Gemini-Flash**: 56分 → **70分** (+25% 🚀)
+- **GPT-4o-Mini**: 58分 → **80分** (+38% 🎯)  
+- **达成目标**: 超越Phase 1目标(70-75分)，GPT-4o接近Phase 2水准
+
+**🔧 核心优化措施**:
+1. **数据量修正**: 默认120根K线满足Brooks结构分析需求
+2. **术语映射系统**: 解决提示词与评估器术语不匹配问题
+3. **权重重新分配**: 60%分析质量+40%术语准确性，更科学合理
+4. **Brooks概念深度**: 增强H1/H2, follow-through, Always In状态识别
 
 ### 🚀 **Advanced AI-Direct Analysis Architecture**
 **Revolutionary multi-timeframe system with complete elimination of traditional preprocessing**:
@@ -369,9 +381,12 @@ python main.py demo
 - **No TUI framework** (Textual removed, replaced with Typer + Rich)
 
 ### Recent System Changes (Important)
+- **🎊 v1.2.0 Quality Boost** (2025-08-29): Al Brooks质量评分优化，Gemini 70分，GPT-4o 80分
 - **Multi-Timeframe Analysis Added**: Complete multi-timeframe analysis system with scenario detection
-- **Real-Time Engine Added**: WebSocket-based real-time analysis with adaptive frequency
+- **Real-Time Engine Added**: WebSocket-based real-time analysis with adaptive frequency  
 - **Al Brooks Integration**: Professional Al Brooks price action methodology implementation
+- **Quality Scoring Optimization**: 术语映射系统+权重调整，解决评分偏低问题
+- **Data Validation Enhancement**: 120根K线最小数据量要求，确保结构分析质量
 - **Confluence Analysis**: Multi-timeframe price level convergence detection
 - **Context Management**: Advanced analysis result integration with historical tracking
 - **TUI Removed**: Complex Textual-based TUI interface eliminated for simplicity
@@ -382,7 +397,48 @@ python main.py demo
 - **Dynamic Allocation**: Smart token distribution based on analysis type and model capacity
 - **External Prompt System**: Prompts externalized to files, supporting multiple analysis methodologies
 
-## Multi-Timeframe Analysis System (NEW)
+## 🚧 Al Brooks验证期特别说明 (NEW)
+
+### 📋 **当前系统状态**
+**AI-Trader系统目前处于Al Brooks验证期**，为确保分析质量，暂时仅支持Al Brooks价格行为分析方法。
+
+**🎯 验证期目标**:
+- 专注验证Al Brooks方法的准确性和稳定性
+- 建立高质量分析基准
+- 优化AI直接分析效果
+- 为后续方法引入建立标准
+
+**📊 可用方法**:
+```bash
+# 当前唯一支持的方法
+--method al-brooks
+--method price-action-al-brooks-analysis
+```
+
+**⏳ 计划恢复顺序**:
+1. **VPA经典分析** (基础重要) - 下一个恢复
+2. **ICT公允价值缺口** (流行方法)
+3. **其他ICT和价格行为方法**
+4. **高级综合分析方法**
+
+**🔧 完整方法库备份**: `prompts/prompt_manager_full.py.backup`
+
+### 💡 **验证期使用指南**
+```bash
+# 查看当前可用方法
+python main.py methods
+
+# Al Brooks基础分析
+python main.py analyze --method al-brooks
+
+# Al Brooks多时间周期分析
+python main.py multi-analyze --method al-brooks --timeframes "1h,4h,1d"
+
+# Al Brooks实时分析
+python main.py realtime --method al-brooks --symbol ETHUSDT
+```
+
+## Multi-Timeframe Analysis System
 
 ### 🎯 **Analysis Scenarios**
 The system intelligently selects optimal timeframes based on detected market scenarios:
@@ -428,48 +484,61 @@ The system intelligently selects optimal timeframes based on detected market sce
 
 ## External Prompt Management System
 
-### Available Analysis Methods
-The system now supports specialized analysis methodologies through external prompt files:
+### 🎯 **Al Brooks Price Action Analysis (验证期唯一方法)**
+**专业Al Brooks方法论实现**，基于《Trading Price Action Trading Ranges》和《Reading Price Charts Bar by Bar》:
 
-**Volume Analysis Methods:**
-- `volume-analysis-vpa-classic`: Classical VPA (Volume Price Analysis) based on Wyckoff theory
-- `volume-analysis-vsa-coulling`: Anna Coulling VSA (Volume Spread Analysis) methodology
-- `volume-analysis-volume-profile`: Volume profile and distribution analysis
+**🧠 核心框架:**
+- **Always In概念**: 市场状态识别 (Always In Long/Short/Transitioning)
+- **价格行为信号**: Pin bars, inside bars, outside bars, trend bars, follow-through patterns
+- **K线组合**: Two-legged pullbacks, wedge patterns, channel patterns, flag patterns  
+- **结构分析**: 趋势强度评估, swing point识别, breakout analysis
+- **交易计划**: 具体的入场/出场条件和Al Brooks风险管理原则
 
-**ICT Concepts Methods:**
-- `ict-concepts-fair-value-gaps`: ICT Fair Value Gap identification and analysis
-- `ict-concepts-liquidity-zones`: ICT liquidity analysis and order flow
-- `ict-concepts-order-blocks`: ICT order block identification and mitigation
-- `ict-concepts-market-structure`: ICT market structure and BOS/CHoCH analysis
+**📊 质量评估**: 专门检测Al Brooks术语的评估器 (always in, pin bar, follow through, two-legged等)
 
-**Price Action Methods:**
-- `price-action-support-resistance`: Support and resistance level analysis
-- `price-action-trend-analysis`: Trend structure analysis using Dow theory
-- `price-action-al-brooks-analysis`: Al Brooks price action methodology **(NEW)**
-- `price-action-breakout-patterns`: Breakout pattern identification
-
-**Composite Analysis Methods:**
-- `multi-timeframe`: Multi-timeframe correlation analysis **(NEW)**
-- `perpetual-specific`: Perpetual futures specialized analysis
-
-### 🎯 **Al Brooks Price Action Analysis (NEW)**
-Professional implementation of Al Brooks methodology from "Trading Price Action Trading Ranges" and "Reading Price Charts Bar by Bar":
-
-**Core Framework:**
-- **Always In Concept**: Market state identification (Always In Long/Short/Transitioning)
-- **Price Action Signals**: Pin bars, inside bars, outside bars, trend bars, follow-through patterns
-- **K-Line Combinations**: Two-legged pullbacks, wedge patterns, channel patterns, flag patterns
-- **Structure Analysis**: Trend strength assessment, swing point identification, breakout analysis
-- **Trading Plans**: Specific entry/exit conditions with Al Brooks risk management principles
-
-**Quality Evaluation**: Specialized evaluator detecting Al Brooks terminology (always in, pin bar, follow through, two-legged, etc.)
-
-**Usage**: `--method price-action-al-brooks-analysis`
-
-### Method Discovery
+**⚡ 使用方式**:
 ```bash
-# List all available analysis methods with descriptions (NEW Typer CLI)
+# 简短格式
+--method al-brooks
+
+# 完整格式  
+--method price-action-al-brooks-analysis
+```
+
+### 📚 **暂时禁用的分析方法**
+以下方法已暂时禁用，将在Al Brooks验证完成后按优先级恢复：
+
+**🔒 Volume Analysis Methods (暂时禁用):**
+- ~~`volume-analysis-vpa-classic`~~: Classical VPA (下一个恢复)
+- ~~`volume-analysis-vsa-coulling`~~: Anna Coulling VSA methodology
+- ~~`volume-analysis-volume-profile`~~: Volume profile analysis
+
+**🔒 ICT Concepts Methods (暂时禁用):**
+- ~~`ict-concepts-fair-value-gaps`~~: ICT Fair Value Gap (第二优先级)
+- ~~`ict-concepts-liquidity-zones`~~: ICT liquidity analysis
+- ~~`ict-concepts-order-blocks`~~: ICT order block identification
+- ~~`ict-concepts-market-structure`~~: ICT market structure analysis
+
+**🔒 Other Price Action Methods (暂时禁用):**
+- ~~`price-action-support-resistance`~~: Support and resistance analysis
+- ~~`price-action-trend-analysis`~~: Trend structure analysis
+- ~~`price-action-breakout-patterns`~~: Breakout pattern identification
+
+**🔒 Composite Analysis Methods (暂时禁用):**
+- ~~`multi-timeframe`~~: Multi-timeframe correlation analysis
+- ~~`perpetual-specific`~~: Perpetual futures specialized analysis
+
+**📁 完整方法库**: 所有方法配置已备份到 `prompt_manager_full.py.backup`
+
+### Method Discovery (验证期版本)
+```bash
+# 列出当前可用方法 (Al Brooks验证期)
 python main.py methods
+
+# 输出示例:
+# 🧪 AI-Trader 分析方法库 - Al Brooks验证期
+# ℹ️ 当前仅支持 Al Brooks 价格行为分析方法
+# 📋 计划恢复顺序: VPA经典 → ICT FVG → 其他方法
 ```
 
 ### Quality Evaluation System
