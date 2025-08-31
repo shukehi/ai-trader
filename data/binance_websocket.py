@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 币安WebSocket实时数据客户端
-基于Anna Coulling VSA理论的实时多时间框架数据流
+基于Al Brooks价格行为分析的实时多时间框架数据流
 
 核心功能：
 1. 实时Kline数据流监听 (5m, 15m, 30m, 1h, 4h, 1d)
@@ -90,7 +90,7 @@ class BinanceWebSocketClient:
     """
     币安WebSocket实时数据客户端
     
-    专为VPA多时间框架分析设计的高性能WebSocket客户端
+    专为Al Brooks多时间框架分析设计的高性能WebSocket客户端
     """
     
     def __init__(self, config: Optional[StreamConfig] = None):
@@ -248,7 +248,7 @@ class BinanceWebSocketClient:
         try:
             kline = KlineData.from_binance_data(data)
             
-            # 只处理已完成的K线 (关键：VSA分析需要完整K线)
+            # 只处理已完成的K线 (关键：Al Brooks分析需要完整K线)
             if kline.is_closed:
                 self.stats['klines_processed'] += 1
                 

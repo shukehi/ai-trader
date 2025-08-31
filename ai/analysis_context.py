@@ -52,15 +52,13 @@ class ContextEvent:
 
 @dataclass
 class TimeframeAnalysisContext:
-    """单时间框架分析上下文"""
+    """单时间框架分析上下文 - Al Brooks专用"""
     timeframe: str
     quality_score: float
     signal_strength: SignalStrength
     key_insights: List[str]
     risk_factors: List[str]
-    support_resistance: Dict[str, float]
     volume_analysis: Dict[str, Any]
-    trend_analysis: Dict[str, Any]
     timestamp: datetime
     
     def get_weight(self) -> float:
@@ -168,9 +166,7 @@ class AnalysisHistoryManager:
                                 'signal_strength': ctx.signal_strength.value,
                                 'key_insights': ctx.key_insights,
                                 'risk_factors': ctx.risk_factors,
-                                'support_resistance': ctx.support_resistance,
-                                'volume_analysis': ctx.volume_analysis,
-                                'trend_analysis': ctx.trend_analysis
+                                'volume_analysis': ctx.volume_analysis
                             }
                             for tf, ctx in context.timeframe_contexts.items()
                         },
@@ -242,19 +238,8 @@ class ConfluenceAnalyzer:
         """查找汇聚区域"""
         confluence_zones = []
         
-        # 收集所有支撑阻力位
+        # Al Brooks分析专注于价格行为模式而非传统支撑阻力
         all_levels = []
-        for tf, context in timeframe_contexts.items():
-            weight = context.get_weight()
-            for level_type, price in context.support_resistance.items():
-                if price > 0:  # 有效价格
-                    all_levels.append({
-                        'price': price,
-                        'type': level_type,
-                        'timeframe': tf,
-                        'weight': weight,
-                        'quality': context.quality_score
-                    })
         
         if len(all_levels) < 2:
             return confluence_zones
@@ -396,9 +381,6 @@ class AnalysisContext:
         key_insights = self._extract_insights(analysis_text)
         risk_factors = self._extract_risk_factors(analysis_text)
         
-        # 默认支撑阻力位（实际应用中需要从分析中提取）
-        support_resistance = self._extract_support_resistance(analysis_text)
-        
         # 生成信号强度
         quality_score = result.get('quality_score', 50)
         signal_strength = self._determine_signal_strength(analysis_text, quality_score)
@@ -409,9 +391,7 @@ class AnalysisContext:
             signal_strength=signal_strength,
             key_insights=key_insights,
             risk_factors=risk_factors,
-            support_resistance=support_resistance,
             volume_analysis={'pattern': 'normal'},  # 简化
-            trend_analysis={'direction': 'neutral'},  # 简化
             timestamp=timestamp
         )
     
@@ -451,13 +431,6 @@ class AnalysisContext:
         
         return risks[:2]  # 最多2个风险因素
     
-    def _extract_support_resistance(self, text: str) -> Dict[str, float]:
-        """提取支撑阻力位（简化版）"""
-        # 实际应用中应该使用更复杂的方法从AI分析中提取具体价格水平
-        return {
-            'support1': 0.0,
-            'resistance1': 0.0
-        }
     
     def _determine_signal_strength(self, text: str, quality_score: float) -> SignalStrength:
         """确定信号强度"""

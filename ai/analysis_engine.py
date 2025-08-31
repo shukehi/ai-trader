@@ -87,7 +87,7 @@ class AnalysisEngine:
 
 {csv_data}
 
-请从Volume Price Analysis (VPA)专业角度进行分析，包括：
+请从Al Brooks价格行为分析专业角度进行分析，包括：
 """
         
         if analysis_type == 'simple':

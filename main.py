@@ -162,14 +162,14 @@ def methods():
     # 验证期说明
     console.print(Panel(
         "ℹ️  [bold blue]当前状态说明[/bold blue]\n\n"
-        "为确保分析质量，系统当前仅支持 Al Brooks 价格行为分析方法。\n"
-        "其他方法将在验证完成后按优先级逐步恢复：\n\n"
-        "📋 [yellow]计划恢复顺序[/yellow]:\n"
-        "   1️⃣  VPA经典分析 (基础重要)\n"
-        "   2️⃣  ICT公允价值缺口 (流行方法)\n"
-        "   3️⃣  其他ICT和价格行为方法\n"
-        "   4️⃣  高级综合分析方法\n\n"
-        "📞 如需完整方法库，请查看: prompt_manager_full.py.backup",
+        "系统已专门优化为Al Brooks价格行为分析方法。\n"
+        "专注于Al Brooks价格行为理论和实践，提供高质量分析结果。\n\n"
+        "🎯 [yellow]Al Brooks方法特色[/yellow]:\n"
+        "   📊  Always In概念分析\n"
+        "   📈  Swing结构识别\n"
+        "   📉  价格行为模式识别\n"
+        "   🎯  精确入场出场点位\n\n"
+        "📈 质量评分目标: 70-80分以上",
         border_style="blue",
         title="验证期信息"
     ))

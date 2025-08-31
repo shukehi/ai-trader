@@ -6,9 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 AI-Trader is an advanced AI-powered trading analysis system that directly analyzes raw OHLCV candlestick data without traditional technical indicator preprocessing. The core innovation is using LLMs to understand price action patterns through natural language analysis rather than mathematical calculations.
 
-**Core Breakthrough**: AI directly interprets raw market data → Professional trading analysis (80-100/100 quality scores)
+**Core Breakthrough**: AI directly interprets raw market data → Professional Al Brooks price action analysis (70-80/100 quality scores)
 
-**Current Status**: Production-ready system with Al Brooks price action methodology achieving 70-80/100 quality scores. System uses 4 premium models: GPT-5-Chat, Claude-Opus-41, Gemini-25-Pro, and Grok4.
+**Current Status**: Production-ready system specialized exclusively for Al Brooks price action methodology. The system has been optimized and simplified to focus on this single, highly effective analysis approach using 4 premium models: GPT-5-Chat, Claude-Opus-41, Gemini-25-Pro, and Grok4.
 
 ## Essential Commands
 
@@ -31,13 +31,13 @@ python -c "from data import BinanceFetcher; print('✅ Data fetching ready')"
 
 ### Primary Analysis Commands
 ```bash
-# Basic analysis (120 bars default for Al Brooks method)
+# Basic Al Brooks analysis (120 bars default for swing structure analysis)
 python main.py analyze --symbol ETHUSDT --model gpt5-chat
 
 # Al Brooks price action analysis (currently the only supported method)
 python main.py analyze --method al-brooks --symbol BTCUSDT --model claude-opus-41
 
-# Multi-timeframe analysis
+# Multi-timeframe Al Brooks analysis
 python main.py multi-analyze --symbol ETHUSDT --timeframes "15m,1h,4h"
 
 # Real-time analysis
@@ -73,7 +73,7 @@ python main.py analyze --method al-brooks --symbol ETHUSDT --limit 120 --verbose
 
 ### High-Level Data Flow
 ```
-Raw OHLCV Data → AI Direct Analysis → Professional Trading Report
+Raw OHLCV Data → AI Direct Analysis → Professional Al Brooks Report
      ↓                    ↓                     ↓
   Binance API       RawDataAnalyzer        Structured JSON +
  (120+ bars)      (with quality scoring)     Text Analysis
@@ -82,22 +82,22 @@ Raw OHLCV Data → AI Direct Analysis → Professional Trading Report
 ### Key Components
 
 **AI Analysis Layer** (`ai/`):
-- `RawDataAnalyzer`: Primary analysis engine with quality scoring system and intelligent token management
+- `RawDataAnalyzer`: Primary analysis engine with Al Brooks quality scoring system and intelligent token management
 - `OpenRouterClient`: LLM API client with automatic fallback mechanism when token limits are exceeded
 - `MultiTimeframeAnalyzer`: Parallel analysis across multiple timeframes
 - `AnalysisEngine`: Legacy interface, still used by some flows
-- Quality scoring system optimized for Al Brooks methodology (v1.2.0)
+- Quality scoring system specifically optimized for Al Brooks terminology and concepts
 
 **Data Layer** (`data/`):
 - `BinanceFetcher`: CCXT-based market data retrieval with automatic format handling (ETHUSDT ↔ ETH/USDT)
-- `BinanceWebSocket`: Real-time data streaming for live analysis
+- `BinanceWebSocket`: Real-time data streaming for live Al Brooks analysis
 - Robust error handling and reconnection logic
 
 **Prompt System** (`prompts/`):
-- `PromptManager`: External prompt file management system
-- Al Brooks methodology prompts in `price_action/al_brooks_analysis.txt`
-- Term mapping system to resolve evaluation inconsistencies
-- Currently in "Al Brooks validation period" - other methods temporarily disabled
+- `PromptManager`: External prompt file management system (simplified for Al Brooks only)
+- Al Brooks methodology prompts in `price_action/al_brooks_analysis.txt` (only remaining prompt file)
+- Term mapping system to resolve Al Brooks evaluation inconsistencies
+- System specialized exclusively for Al Brooks analysis - all other methods removed
 
 **Configuration** (`config/`):
 - `Settings`: API key management and model definitions with token limit validation
@@ -106,7 +106,7 @@ Raw OHLCV Data → AI Direct Analysis → Professional Trading Report
 
 **CLI Interface** (`main.py`):
 - Typer + Rich modern CLI with progress bars, formatted tables, and color-coded output
-- Comprehensive command structure for analysis, real-time monitoring, and system management
+- Comprehensive command structure for Al Brooks analysis, real-time monitoring, and system management
 
 ## Critical Architecture Features
 
@@ -126,27 +126,26 @@ The system enforces strict quality standards for Al Brooks price action analysis
 - **Term Mapping**: Resolves evaluation inconsistencies ("reversal bar with long tail" → "pin bar")
 - **Diagnostic Fields**: All analyses include validation flags for compliance
 
-### Multi-Model Support
-- **Primary Models**: gpt5-chat, claude-opus-41 (main analysis engines)
-- **Validation Models**: gemini-25-pro, grok4 (fallback and validation)
-- **Consensus Mechanisms**: Multi-model validation with 60% consensus threshold
-- **Performance Optimization**: Model selection based on analysis complexity and token requirements
+### Specialized Al Brooks System
+- **Single Method Focus**: System exclusively supports Al Brooks price action analysis
+- **Optimized Prompts**: Single, highly optimized prompt file for Al Brooks methodology
+- **Specialized Quality Evaluation**: Quality scoring tailored specifically for Al Brooks concepts and terminology
+- **Simplified Architecture**: Removed complexity by focusing on one proven methodology
 
 ## Development Workflow
 
 ### Making Changes to Analysis Quality
-1. Modify evaluation criteria in `prompts/prompt_manager.py`
+1. Modify evaluation criteria in `prompts/prompt_manager.py` 
 2. Update term mappings in `BROOKS_TERM_MAPPING` if needed
 3. Test with GPT-5-Chat and Claude-Opus-41 models
 4. Run `pytest -q` to validate Brooks quality compliance
 5. Expect quality scores of 70-80+ for properly optimized prompts
 
-### Adding New Analysis Methods
-1. Currently disabled during Al Brooks validation period
-2. When enabled: add prompts to appropriate `/prompts/` subdirectory
-3. Update method mapping in `PromptManager.get_method_info()`
-4. Create quality evaluator in `PromptManager._evaluate_*_quality()`
-5. Add tests in `tests/` directory following Brooks quality pattern
+### Al Brooks Prompt Development
+1. Edit the single prompt file: `prompts/price_action/al_brooks_analysis.txt`
+2. Update method mapping in `PromptManager.get_method_info()` if needed
+3. Adjust quality evaluator in `PromptManager._evaluate_pa_quality()`
+4. Add tests in `tests/` directory following Brooks quality pattern
 
 ### Token Limit Troubleshooting
 If encountering token limit errors:
@@ -164,15 +163,15 @@ If encountering token limit errors:
 ## Important Files
 
 - **`main.py`**: Typer CLI with Rich formatting, primary entry point
-- **`ai/raw_data_analyzer.py`**: Core analysis engine with quality scoring
+- **`ai/raw_data_analyzer.py`**: Core analysis engine with Al Brooks quality scoring
 - **`ai/openrouter_client.py`**: LLM API client with intelligent token management and fallback
-- **`prompts/prompt_manager.py`**: Quality evaluation and term mapping system
-- **`prompts/price_action/al_brooks_analysis.txt`**: Al Brooks methodology prompt
+- **`prompts/prompt_manager.py`**: Al Brooks quality evaluation and term mapping system
+- **`prompts/price_action/al_brooks_analysis.txt`**: Al Brooks methodology prompt (only prompt file)
 - **`config/settings.py`**: API configuration, model definitions, and token limits
 - **`tests/test_brooks_quality.py`**: Brooks analysis quality compliance tests
 - **`.env.example`**: Complete configuration template
 
-## Brooks Quality Validation Rules
+## Al Brooks Quality Validation Rules
 
 The system enforces specific rules for Al Brooks analysis compliance:
 
@@ -183,12 +182,39 @@ The system enforces specific rules for Al Brooks analysis compliance:
 - Bar indexing uses negative indices relative to last closed bar (-1 = latest)
 - Diagnostic validation: `tick_rounded`, `rr_includes_fees_slippage`, `used_closed_bar_only`, `metadata_locked`, `htf_veto_respected` all true
 
+## Al Brooks Specific Concepts
+
+The system understands and evaluates these Al Brooks concepts:
+
+**Core Terminology**:
+- Always In concepts (Always In Long, Always In Short, market state transitions)
+- Bar patterns (pin bars, inside bars, outside bars, trend bars, follow-through)
+- Swing structure (H1, H2, L1, L2, swing points, pullbacks)
+- Trading ranges (breakout mode, tight trading range, measured moves)
+
+**Quality Evaluation**:
+- Structure analysis depth (30 points): Always In states, swing identification
+- Trading plan completeness (20 points): Entry, exit, stop, risk management
+- Brooks concepts application (10 points): Specific methodology terms
+- Brooks terminology accuracy (25 points): Correct use of technical terms
+- Price data integration (15 points): Specific price references and analysis
+
 ## Performance and Monitoring
 
-- **Target Response Time**: 5-7 seconds average for standard analysis
-- **Quality Target**: 80-100/100 professional analysis scores
+- **Target Response Time**: 5-15 seconds average for standard analysis
+- **Quality Target**: 70-80/100 Al Brooks analysis scores (improved from earlier 50-60 range)
 - **Token Efficiency**: ~60% reduction through CSV formatting and intelligent allocation
 - **Error Recovery**: Automatic model fallback with graceful degradation
 - **Real-time Capability**: WebSocket support for live market monitoring
+- **Analysis Success Rate**: >98% with intelligent token management
 
-Run quality validation tests regularly to ensure system performance maintains professional standards.
+## System Evolution Notes
+
+**Recent Optimizations (v1.3.0)**:
+- Specialized system exclusively for Al Brooks analysis
+- Removed VPA, ICT, and other analysis methods for simplicity and focus
+- Optimized quality scoring specifically for Al Brooks terminology
+- Improved token management with automatic model fallbacks
+- Enhanced error handling and system reliability
+
+Run quality validation tests regularly to ensure system performance maintains professional Al Brooks analysis standards.

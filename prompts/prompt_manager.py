@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-提示词管理器 - 支持多种交易分析方法的提示词管理
+提示词管理器 - Al Brooks价格行为分析专用
 """
 
 import os
@@ -49,13 +49,12 @@ BROOKS_TERM_MAPPING = {
 
 class PromptManager:
     """
-    提示词管理器 - Al Brooks验证期版本
+    提示词管理器 - Al Brooks价格行为分析专用版本
     
-    当前支持的分析方法（验证期）：
-    - Al Brooks 价格行为分析 (专业验证中)
+    专注于Al Brooks价格行为分析方法：
+    - Al Brooks 价格行为分析 (生产就绪)
     
-    注意：为确保分析质量，当前仅支持Al Brooks方法。
-    其他方法将在验证完成后逐步恢复。
+    系统已优化为专门支持Al Brooks方法论。
     """
     
     def __init__(self, prompts_dir: str = None):
@@ -76,8 +75,8 @@ class PromptManager:
         加载指定分析方法的提示词
         
         Args:
-            category: 分析类别 (volume_analysis, price_action, ict_concepts, composite)
-            method: 具体方法名 (vpa_classic, liquidity_zones, etc.)
+            category: 分析类别 (仅支持 price_action)
+            method: 具体方法名 (仅支持 al_brooks_analysis)
             
         Returns:
             提示词内容
@@ -149,13 +148,8 @@ class PromptManager:
         Returns:
             {'category': 'volume_analysis', 'method': 'vpa_classic', 'display_name': 'VPA经典分析'}
         """
-        # ==== Al Brooks 验证期方法映射 ====
-        # 注意：为确保分析质量，当前仅支持Al Brooks价格行为分析方法
-        # 其他方法已暂时禁用，将在验证完成后逐步恢复
-        # 完整方法列表备份位于: prompt_manager_full.py.backup
-        
+        # ==== Al Brooks 价格行为分析方法映射 ====
         method_mapping = {
-            # Al Brooks 价格行为分析方法（验证期唯一支持）
             'al-brooks': {
                 'category': 'price_action',
                 'method': 'al_brooks_analysis',
@@ -167,41 +161,14 @@ class PromptManager:
                 'method': 'al_brooks_analysis',
                 'display_name': 'Al Brooks价格行为分析',
                 'requires_metadata': True
-            },
-            
-            # ==== 暂时禁用的方法 ====
-            # 将在Al Brooks验证完成后按以下顺序恢复：
-            # 1. VPA经典分析 (基础重要)
-            # 2. ICT公允价值缺口 (流行方法) 
-            # 3. 其他ICT和价格行为方法
-            # 4. 高级综合分析方法
-            
-            # VPA分析方法 (暂时禁用)
-            # 'vpa-classic': {'category': 'volume_analysis', 'method': 'vpa_classic', 'display_name': 'VPA经典分析'},
-            # 'vsa-coulling': {'category': 'volume_analysis', 'method': 'vsa_coulling', 'display_name': 'Anna Coulling VSA'},
-            # 'volume-profile': {'category': 'volume_analysis', 'method': 'volume_profile', 'display_name': '成交量分布分析'},
-            
-            # ICT概念方法 (暂时禁用)
-            # 'ict-liquidity': {'category': 'ict_concepts', 'method': 'liquidity_zones', 'display_name': 'ICT流动性分析'},
-            # 'ict-orderblocks': {'category': 'ict_concepts', 'method': 'order_blocks', 'display_name': 'ICT订单块分析'},
-            # 'ict-fvg': {'category': 'ict_concepts', 'method': 'fair_value_gaps', 'display_name': 'ICT公允价值缺口'},
-            
-            # 其他价格行为分析 (暂时禁用)
-            # 'pa-support-resistance': {'category': 'price_action', 'method': 'support_resistance', 'display_name': '支撑阻力分析'},
-            # 'pa-trend': {'category': 'price_action', 'method': 'trend_analysis', 'display_name': '趋势分析'},
-            
-            # 综合分析 (暂时禁用)
-            # 'multi-timeframe': {'category': 'composite', 'method': 'multi_timeframe', 'display_name': '多时间框架分析'},
-            # 'perpetual-specific': {'category': 'composite', 'method': 'perpetual_specific', 'display_name': '永续合约专项分析'}
+            }
         }
         
         if full_method not in method_mapping:
-            # Al Brooks验证期友好错误提示
             available_methods = list(method_mapping.keys())
-            raise ValueError(f"\n❌ 当前验证期仅支持Al Brooks分析方法。\n" +
+            raise ValueError(f"\n❌ 系统仅支持Al Brooks分析方法。\n" +
                            f"🔍 可用方法: {available_methods}\n" +
-                           f"📝 请使用: --method price-action-al-brooks-analysis\n" +
-                           f"ℹ️  其他方法将在Al Brooks验证完成后逐步恢复。")
+                           f"📝 请使用: --method al-brooks 或 --method price-action-al-brooks-analysis")
         
         return method_mapping[full_method]
 
@@ -222,81 +189,11 @@ class PromptManager:
         method_info = self.get_method_info(full_method)
         category = method_info['category']
         
-        # 根据分析类别返回对应的质量评估器
-        if category == 'volume_analysis':
-            return self._evaluate_vpa_quality
-        elif category == 'ict_concepts':
-            return self._evaluate_ict_quality  
-        elif category == 'price_action':
+        # Al Brooks专用质量评估器
+        if category == 'price_action':
             return self._evaluate_pa_quality
-        elif category == 'composite':
-            return self._evaluate_composite_quality
         else:
             return self._evaluate_general_quality
-    
-    def _evaluate_vpa_quality(self, analysis_text: str, df: Any) -> int:
-        """VPA分析质量评估 (基于VSA/VPA理论)"""
-        score = 0
-        
-        # 1. VPA专业术语 (25分)
-        vpa_terms = ['VSA', 'VPA', 'Smart Money', 'Dumb Money', 'Accumulation', 'Distribution', 
-                    'Markup', 'Markdown', 'Wide Spread', 'Narrow Spread', 'Volume Climax',
-                    'No Demand', 'No Supply', 'Upthrust', 'Spring', 'Effort', 'Result']
-        term_count = sum(1 for term in vpa_terms if term.lower() in analysis_text.lower())
-        score += min(25, term_count * 3)
-        
-        # 2. 量价关系分析 (25分)
-        volume_price_keywords = ['量价关系', '成交量配合', '放量', '缩量', '量价背离', '量价同步']
-        if any(keyword in analysis_text for keyword in volume_price_keywords):
-            score += 25
-        
-        # 3. 市场阶段识别 (25分) 
-        stage_keywords = ['accumulation', 'distribution', 'markup', 'markdown', '吸筹', '派发', '拉升', '下跌']
-        if any(keyword.lower() in analysis_text.lower() for keyword in stage_keywords):
-            score += 25
-        
-        # 4. 具体数据引用 (15分)
-        if any(str(round(price, 2)) in analysis_text for price in df['close'].values[-5:]):
-            score += 15
-        
-        # 5. 交易建议 (10分)
-        trading_keywords = ['建议', '入场', '出场', '止损', '目标']
-        if any(keyword in analysis_text for keyword in trading_keywords):
-            score += 10
-        
-        return min(100, score)
-    
-    def _evaluate_ict_quality(self, analysis_text: str, df: Any) -> int:
-        """ICT概念分析质量评估"""
-        score = 0
-        
-        # 1. ICT专业术语 (30分)
-        ict_terms = ['Liquidity', 'Order Block', 'Fair Value Gap', 'FVG', 'Market Structure', 
-                    'BOS', 'CHoCH', 'Displacement', 'Imbalance', 'Smart Money', 'Institutional',
-                    'Manipulation', 'Accumulation', 'Distribution', 'PD Arrays', 'Optimal Trade Entry']
-        term_count = sum(1 for term in ict_terms if term.lower() in analysis_text.lower())
-        score += min(30, term_count * 4)
-        
-        # 2. 流动性分析 (20分)
-        liquidity_keywords = ['流动性', 'liquidity', '止损猎取', 'stop hunt', '流动性区域']
-        if any(keyword.lower() in analysis_text.lower() for keyword in liquidity_keywords):
-            score += 20
-        
-        # 3. 市场结构分析 (20分)
-        structure_keywords = ['市场结构', 'market structure', 'BOS', 'break of structure', 'CHoCH']
-        if any(keyword.lower() in analysis_text.lower() for keyword in structure_keywords):
-            score += 20
-        
-        # 4. 具体价位分析 (20分)
-        if any(str(round(price, 2)) in analysis_text for price in df['close'].values[-5:]):
-            score += 20
-        
-        # 5. 入场策略 (10分)
-        entry_keywords = ['入场', 'entry', 'OTE', 'optimal trade entry', '最优入场']
-        if any(keyword.lower() in analysis_text.lower() for keyword in entry_keywords):
-            score += 10
-        
-        return min(100, score)
     
     def _evaluate_pa_quality(self, analysis_text: str, df: Any) -> int:
         """价格行为分析质量评估（优化Al Brooks支持）- 新权重分配"""
@@ -359,31 +256,6 @@ class PromptManager:
         # 风险管理细节奖励 (额外5分)
         if any(term in text_lower for term in ['structural stop', 'measured move', 'magnet']):
             score += 5
-        
-        return min(100, score)
-    
-    def _evaluate_composite_quality(self, analysis_text: str, df: Any) -> int:
-        """综合分析质量评估"""
-        score = 0
-        
-        # 1. 多维度分析 (30分)
-        dimensions = ['技术分析', '基本面', '情绪面', '资金面', 'technical', 'fundamental', 'sentiment']
-        dimension_count = sum(1 for dim in dimensions if dim.lower() in analysis_text.lower())
-        score += min(30, dimension_count * 6)
-        
-        # 2. 时间框架分析 (25分)
-        timeframe_keywords = ['短期', '中期', '长期', '多时间框架', 'short term', 'medium term', 'long term']
-        if any(keyword.lower() in analysis_text.lower() for keyword in timeframe_keywords):
-            score += 25
-        
-        # 3. 风险管理 (25分)
-        risk_keywords = ['风险管理', '止损', '资金管理', '仓位控制', 'risk management', 'position sizing']
-        if any(keyword.lower() in analysis_text.lower() for keyword in risk_keywords):
-            score += 25
-        
-        # 4. 数据引用 (20分)
-        if any(str(round(price, 2)) in analysis_text for price in df['close'].values[-5:]):
-            score += 20
         
         return min(100, score)
     

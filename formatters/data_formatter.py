@@ -171,15 +171,15 @@ class DataFormatter:
     def to_pattern_description(df: pd.DataFrame, include_vsa: bool = True, 
                              include_perpetual_context: bool = True) -> str:
         """
-        格式D: 增强的VPA专业分析格式
-        整合VSA分析和永续合约特色，基于Anna Coulling理论
+        格式D: Al Brooks价格行为专业分析格式
+        整合Al Brooks分析和永续合约特色
         
         Args:
             df: OHLCV数据
-            include_vsa: 是否包含VSA分析
+            include_vsa: 是否包含价格行为分析
             include_perpetual_context: 是否包含永续合约背景
         """
-        lines = ["# ETH/USDT 永续合约VPA专业分析\\n"]
+        lines = ["# ETH/USDT 永续合约Al Brooks价格行为分析\\n"]
         
         # 市场概况
         lines.append("## 🎯 市场概况")
